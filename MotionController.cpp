@@ -358,7 +358,7 @@ int main(int argc, char** argv)
       sleep(20);                  // sleep until gyroscope is calibrated
 
       moveForward();
-      sleep(2);
+      sleep(3);
       //moveForward();
       
 

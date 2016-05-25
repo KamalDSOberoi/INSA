@@ -166,8 +166,8 @@ public:
 			if(maxNodeID < currentNode.id)
 				maxNodeID = currentNode.id;
 		}
-		//landmarkCounter = maxNodeID + 1;
-		landmarkCounter = maxNodeID;
+		landmarkCounter = maxNodeID + 1;
+		//landmarkCounter = maxNodeID;
 	}
 
 	/* Dina Youakim */
@@ -213,6 +213,8 @@ public:
 				link.setTransform(landmarkToRobotPose);
 				linksOut.insert(std::make_pair(link.from(),link));
 
+				landmarks << "old landmarks filled" << std::endl;
+
 
 				landmarks<<"landmark node created between "<<iter->first<<","<<landmarkCounter<<std::endl;
 
@@ -224,13 +226,12 @@ public:
 			}
 
 			ROS_INFO_STREAM("Old Landmarks filled");
-			landmarks<<"end inserting old landmark nodes "<<std::endl;
 		}
 
 	}
 
     /* Dina Youakim*/
-    void createLandmarks(rtabmap_ros::MapDataConstPtr & msg, std::map<int, rtabmap::Transform> &posesOut, std::multimap<int, rtabmap::Link> & linksOut)
+    /*void createLandmarks(rtabmap_ros::MapDataConstPtr & msg, std::map<int, rtabmap::Transform> &posesOut, std::multimap<int, rtabmap::Link> &linksOut)
 	{
 		for(unsigned int i=0; i<msg->nodes.size(); ++i)
 		{
@@ -253,14 +254,21 @@ public:
 				rtabmap::Transform robotPose(currentNode.pose.position.x, currentNode.pose.position.y, currentNode.pose.position.z, roll, pitch, yaw);
 				rtabmap::Transform landmarkToRobotPose =  (robotPose)*landmarkObservation;
 				
-				landmarks<<"observed at time: "<<currentNode.stamp<<", for node: "<<currentNode.id<<std::endl;
+				//landmarks<<"observed at time: "<<currentNode.stamp<<", for node: "<<currentNode.id<<std::endl;
 
 				float r,p,y;
 				landmarkObservation.getEulerAngles(r,p,y);
 
 				landmarks << "landmark counter: " << landmarkCounter << std::endl;
 				
-				/* Create landmark link*/
+				//landmarks<<"landmark node created between "<<currentNode.id<<","<<landmarkCounter<<std::endl;
+				//landmarks<<"the landmark pose is: "<<landmarkObservation.translation().x()<<","<<landmarkObservation.translation().y()<<","<<landmarkObservation.theta()<<std::endl;
+			    //landmarks<<"the landmark constraint is: "<<landmarkToRobotPose.translation().x()<<","<<landmarkToRobotPose.translation().y()<<","<<landmarkToRobotPose.theta()<<std::endl;*
+
+				//landmarks<< "landmark observed at: x:" << landmarkObservation.translation().x()<<", y:"<<landmarkObservation.translation().y()<<", theta:"<<landmarkObservation.theta()<<std::endl;
+				landmarks<< "landmark observed at: x:" << landmarkObservation.x()<<", y:"<<landmarkObservation.y()<<", theta:"<<landmarkObservation.theta()<<std::endl;
+
+				// Create landmark link
 				rtabmap::Link link;
 				link.setFrom(currentNode.id);
 				link.setTo (landmarkCounter);
@@ -269,13 +277,8 @@ public:
 				//link.setInfMatrix() ???;
 				//link.setVariance() ???;
 				linksOut.insert(std::make_pair(link.from(),link));
-				
-				//landmarks<<"landmark node created between "<<currentNode.id<<","<<landmarkCounter<<std::endl;
-				//landmarks<<"the landmark pose is: "<<landmarkObservation.translation().x()<<","<<landmarkObservation.translation().y()<<","<<landmarkObservation.theta()<<std::endl;
-			    //landmarks<<"the landmark constraint is: "<<landmarkToRobotPose.translation().x()<<","<<landmarkToRobotPose.translation().y()<<","<<landmarkToRobotPose.theta()<<std::endl;*
+				landmarks << "new landmark link created from "<< currentNode.id << " to " << landmarkCounter << std::endl;
 
-				//landmarks<< "landmark observed at: x:" << landmarkObservation.translation().x()<<", y:"<<landmarkObservation.translation().y()<<", theta:"<<landmarkObservation.theta()<<std::endl;
-				landmarks<< "landmark observed at: x:" << landmarkObservation.x()<<", y:"<<landmarkObservation.y()<<", theta:"<<landmarkObservation.theta()<<std::endl;
 
 				//std::map<int,std::vector< rtabmap::Transform > >::iterator  it;
 
@@ -290,13 +293,78 @@ public:
 
 				ROS_INFO_STREAM("New Landmarks created");
 
+				
+			}
+			
+		}
 
-				//clear userData
-				currentNode.userData.clear();
-				if(currentNode.userData.empty())
+		landmarks<<"current landmark cache size is: "<<landmarksCache_.size()<<std::endl;
+
+	}*/
+
+	/* Kamal: add new landmark link to constraint rather than linksOut */
+    void createLandmarks(rtabmap_ros::MapDataConstPtr & msg, std::map<int, rtabmap::Transform> &posesOut, std::multimap<int, Link> &constraints)
+	{
+		for(unsigned int i=0; i<msg->nodes.size(); ++i)
+		{
+			rtabmap_ros::NodeData currentNode = msg->nodes[i];
+			
+			if(!currentNode.userData.empty())
+			{
+				cv::Mat landmark = cv::Mat::zeros(2,3, CV_32F);
+
+				landmark = rtabmap::uncompressData(currentNode.userData);
+
+				rtabmap::Transform landmarkObservation(landmark.at<float>(0,0),landmark.at<float>(0,1),landmark.at<float>(0,2),
+					                                   landmark.at<float>(1,0),landmark.at<float>(1,1),landmark.at<float>(1,2));
+
+				double roll, pitch, yaw;
+				tf::Quaternion quat;
+    			tf::quaternionMsgToTF(currentNode.pose.orientation, quat);
+				tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+
+				rtabmap::Transform robotPose(currentNode.pose.position.x, currentNode.pose.position.y, currentNode.pose.position.z, roll, pitch, yaw);
+				rtabmap::Transform landmarkToRobotPose =  (robotPose)*landmarkObservation;
+				
+				//landmarks<<"observed at time: "<<currentNode.stamp<<", for node: "<<currentNode.id<<std::endl;
+
+				float r,p,y;
+				landmarkObservation.getEulerAngles(r,p,y);
+
+				landmarks << "landmark counter: " << landmarkCounter << std::endl;
+				
+				//landmarks<<"landmark node created between "<<currentNode.id<<","<<landmarkCounter<<std::endl;
+				//landmarks<<"the landmark pose is: "<<landmarkObservation.translation().x()<<","<<landmarkObservation.translation().y()<<","<<landmarkObservation.theta()<<std::endl;
+			    //landmarks<<"the landmark constraint is: "<<landmarkToRobotPose.translation().x()<<","<<landmarkToRobotPose.translation().y()<<","<<landmarkToRobotPose.theta()<<std::endl;*
+
+				//landmarks<< "landmark observed at: x:" << landmarkObservation.translation().x()<<", y:"<<landmarkObservation.translation().y()<<", theta:"<<landmarkObservation.theta()<<std::endl;
+				landmarks<< "landmark observed at: x:" << landmarkObservation.x()<<", y:"<<landmarkObservation.y()<<", theta:"<<landmarkObservation.theta()<<std::endl;
+
+				/* Create landmark link*/
+				rtabmap::Link link;
+				link.setFrom(currentNode.id);
+				link.setTo (landmarkCounter);
+				link.setType (rtabmap::Link::kLandmark);
+				link.setTransform(landmarkToRobotPose);
+				//link.setInfMatrix() ???;
+				//link.setVariance() ???;
+				constraints.insert(std::make_pair(link.from(),link));
+				linksOut.insert(std::make_pair(link.from(),link));
+				landmarks << "new landmark link created from "<< currentNode.id << " to " << landmarkCounter << std::endl;
+
+
+				//std::map<int,std::vector< rtabmap::Transform > >::iterator  it;
+
+				//if the cache is empty; it means it is first time to observe the landmark
+				if(landmarksCache_.empty())
 				{
-					landmarks << "user data has been cleared" << std::endl;
+					posesOut.insert(std::make_pair(landmarkCounter,landmarkObservation));
+					//landmarksCache_.insert(std::make_pair<int, rtabmap::Transform>(currentNode.id,landmarkObservation));
 				}
+					
+				landmarksCache_.insert(std::make_pair<int, rtabmap::Transform>(currentNode.id,landmarkObservation));				
+
+				ROS_INFO_STREAM("New Landmarks created");
 				
 			}
 			
@@ -305,6 +373,8 @@ public:
 		landmarks<<"current landmark cache size is: "<<landmarksCache_.size()<<std::endl;
 
 	}
+
+	
 
     /* Kamal: landmark pose received from core_wrapper */    // => received in userData in robot_frame
 	/*void landmarkPoseReceivedCallback(const geometry_msgs::PoseWithCovarianceStamped & pose)
@@ -334,7 +404,7 @@ public:
 		landmarks << std::endl;
 		landmarks << "new map data received at:" << modifiedMapData->header.stamp << std::endl;
 
-		for(unsigned int i = 0; i < modifiedMapData->nodes.size(); ++i)
+		/*for(unsigned int i = 0; i < modifiedMapData->nodes.size(); ++i)
 		{
 			rtabmap_ros::NodeData currentNode = msg->nodes[i];
 
@@ -355,7 +425,7 @@ public:
 					 
 				}
 			}
-		}
+		}*/
 
 
 		std::multimap<int, Link> newConstraints;
@@ -415,9 +485,9 @@ public:
 		
 		}
 		
-		landmarks << "modifiedMapData->nodes.size(): " << modifiedMapData->nodes.size() << std::endl;
+		/*landmarks << "modifiedMapData->nodes.size(): " << modifiedMapData->nodes.size() << std::endl;
 		landmarks << "modifiedMapData->graph.links.size(): " << modifiedMapData->graph.links.size()<< std::endl;
-		landmarks << "newNodeInfos.size(): " << newNodeInfos.size() << std::endl;
+		landmarks << "newNodeInfos.size(): " << newNodeInfos.size() << std::endl;*/
 
 		if(dataChanged)
 		{
@@ -455,7 +525,7 @@ public:
 			}
 		}
 
-		landmarks << "nodeInfos.size(): " << nodeInfos.size() << std::endl;
+		//landmarks << "nodeInfos.size(): " << nodeInfos.size() << std::endl;
 
 		std::map<int, Transform> poses;
 		for(std::map<int, Signature>::iterator iter=nodeInfos.begin(); iter!=nodeInfos.end(); ++iter)
@@ -464,7 +534,11 @@ public:
 			//landmarks<<"SensorData is: "<<iter->second.sensorData().id()<<","<<iter->second.sensorData().stamp()<<","<<iter->second.sensorData().userDataRaw().empty()<<std::endl;
 		}
 
-		landmarks << "poses.size(): "<< poses.size() << ", constraints.size(): "<< constraints.size() << std::endl;
+		//landmarks << "poses.size(): "<< poses.size() << ", constraints.size(): "<< constraints.size() << std::endl;
+		for(std::multimap<int, Link>::iterator iter = constraints.begin(); iter != constraints.end(); ++iter)
+		{
+			landmarks << "constraint between " << iter->second.from() << " to " << iter->second.to() << std::endl; 
+		}
 
 		Transform landmarkPose, currentRobotPose;
 
@@ -486,31 +560,68 @@ public:
 				
 				int fromId = optimizeFromLastNode_ ? poses.rbegin()->first : poses.begin()->first;
 
-				/*optimizer_->getConnectedGraph(fromId, poses, constraints, posesOut, linksOut);
-                ROS_INFO_STREAM("connected graph computed");
-                landmarks << "connected graph computed: posesOut.size(): " << posesOut.size() << std::endl;
-                landmarks << "connected graph computed: linksOut.size(): " << linksOut.size() << ", constraints.size(): "<< constraints.size() << std::endl;
-				posesOutNoLandmarks = posesOut;*/
 				
 				//Dina Youakim: since landmark nodes IDs are dynamic and change everytime given the max ID we have in the robot pose nodes
 				//we need to compute this max and start creating landmark nodes from max+1
 				initializeLandmarkCounter(modifiedMapData);
 				ROS_INFO_STREAM("counter initialized");
-				landmarks << "counter initialized: posesOut.size(): " << posesOut.size() << std::endl;
-				landmarks << "counter initialized: linksOut.size(): " << linksOut.size() << ", constraints.size(): "<< constraints.size() << std::endl;
+
+
 
 
 				//Dina Youakim: before adding new landmarks; process old ones from the cache and add them to poses and links with new IDs 
 				//given the max used IDs for the normal nodes
-				fillOldLandmarks(modifiedMapData, posesOutLandmarks, linksOut);
-				landmarks << "after fillOldLandmarks: posesOut.size(): " << posesOut.size() << std::endl;
-				landmarks << "after fillOldLandmarks: linksOut.size(): " << linksOut.size() << ", constraints.size(): "<< constraints.size() << std::endl;
+				/*fillOldLandmarks(modifiedMapData, posesOutLandmarks, linksOut);
+				//landmarks << "after fillOldLandmarks: posesOut.size(): " << posesOut.size() << std::endl;
+				//landmarks << "after fillOldLandmarks: linksOut.size(): " << linksOut.size() << ", constraints.size(): "<< constraints.size() << std::endl;
+				for(std::multimap<int, rtabmap::Link>::iterator iter = linksOut.begin(); iter != linksOut.end(); ++iter)
+				{
+					landmarks << "after fillOldLandmarks: linksOut between " << iter->second.from() << " to " << iter->second.to() << std::endl; 
+				}
+				for(std::multimap<int, Link>::iterator iter = constraints.begin(); iter != constraints.end(); ++iter)
+				{
+					landmarks << "after fillOldLandmarks: constraint between " << iter->second.from() << " to " << iter->second.to() << std::endl; 
+				}
+				/*landmarks << "after fillOldLandmarks: posesOutLandmarks.size(): " << posesOutLandmarks.size()  
+						  << ", posesOutNoLandmarks.size(): " << posesOutNoLandmarks.size() << std::endl;
+				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutLandmarks.begin(); iter != posesOutLandmarks.end(); ++iter)
+				{
+					landmarks << "after fillOldLandmarks: posesOutLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+				}
+
+				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutNoLandmarks.begin(); iter != posesOutNoLandmarks.end(); ++iter)
+				{
+					landmarks << " posesOutNoLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+				}*/
+
+
 
 
 				//Dina Youakim create new landmarks here add to poses and links
-				createLandmarks(modifiedMapData, posesOutLandmarks,linksOut);
+				//createLandmarks(modifiedMapData, posesOutLandmarks, linksOut);
+				createLandmarks(modifiedMapData, posesOutLandmarks, constraints);
 				landmarks << "after createLandmarks: posesOut.size(): " << posesOut.size() << std::endl;
 				landmarks << "after createLandmarks: linksOut.size(): " << linksOut.size() << ", constraints.size(): "<< constraints.size() << std::endl;
+				for(std::multimap<int, rtabmap::Link>::iterator iter = linksOut.begin(); iter != linksOut.end(); ++iter)
+				{
+					landmarks << "linksOut: between " << iter->second.from() << " to " << iter->second.to() << std::endl; 
+				}
+				for(std::multimap<int, Link>::iterator iter = constraints.begin(); iter != constraints.end(); ++iter)
+				{
+					landmarks << "constraint between " << iter->second.from() << " to " << iter->second.to() << std::endl; 
+				}
+				landmarks << "after createLandmarks: posesOutLandmarks.size(): " << posesOutLandmarks.size()  
+						  << ", posesOutNoLandmarks.size(): " << posesOutNoLandmarks.size() << std::endl;
+				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutLandmarks.begin(); iter != posesOutLandmarks.end(); ++iter)
+				{
+					landmarks << "posesOutLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+				}
+				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutNoLandmarks.begin(); iter != posesOutNoLandmarks.end(); ++iter)
+				{
+					landmarks << "posesOutNoLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+				}
+
+
 
 				//posesOut.insert(posesOutLandmarks.begin(), posesOutLandmarks.end());
 
@@ -519,14 +630,46 @@ public:
                 ROS_INFO_STREAM("connected graph computed");
                 landmarks << "connected graph computed: posesOut.size(): " << posesOut.size() << std::endl;
                 landmarks << "connected graph computed: linksOut.size(): " << linksOut.size() << ", constraints.size(): "<< constraints.size() << std::endl;
+                for(std::multimap<int, rtabmap::Link>::iterator iter = linksOut.begin(); iter != linksOut.end(); ++iter)
+				{
+					landmarks << "linksOut: between " << iter->second.from() << " to " << iter->second.to() << std::endl; 
+				}
+                for(std::multimap<int, Link>::iterator iter = constraints.begin(); iter != constraints.end(); ++iter)
+				{
+					landmarks << "constraint between " << iter->second.from() << " to " << iter->second.to() << std::endl; 
+				}
+                landmarks << "connected graph computed: posesOutLandmarks.size(): " << posesOutLandmarks.size()  
+						  << ", posesOutNoLandmarks.size(): " << posesOutNoLandmarks.size() << std::endl;
+				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutLandmarks.begin(); iter != posesOutLandmarks.end(); ++iter)
+				{
+					landmarks << "posesOutLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+				}
+				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutNoLandmarks.begin(); iter != posesOutNoLandmarks.end(); ++iter)
+				{
+					landmarks << "posesOutNoLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+				}
+
+
                 posesOutNoLandmarks = posesOut;
 
+
+
                 landmarks << "posesOutLandmarks.size(): " << posesOutLandmarks.size() << ", posesOutNoLandmarks.size(): " << posesOutNoLandmarks.size() << std::endl;
-				
+                for(std::map<int, rtabmap::Transform>::iterator iter = posesOutLandmarks.begin(); iter != posesOutLandmarks.end(); ++iter)
+				{
+					landmarks << "posesOutLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+				}
+				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutNoLandmarks.begin(); iter != posesOutNoLandmarks.end(); ++iter)
+				{
+					landmarks << "posesOutNoLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+				}
 				for (std::multimap<int, rtabmap::Link>::iterator iter = linksOut.begin(); iter != linksOut.end(); ++iter)
 				{
 					landmarks << "linksOut: link.from(): " << iter->second.from() << ", link.to(): " << iter->second.to() << std::endl;
 				}
+
+
+
 
 				//optimizedPoses = optimizer_->optimizeWithLandmarks(fromId, posesOut, linksOut);   // optimizedPoses is of type std::map<int, Transform>
 				optimizedPoses = optimizer_->optimize(fromId, posesOut, linksOut);   // optimizedPoses is of type std::map<int, Transform>
@@ -542,6 +685,8 @@ public:
 				{
 					landmarks << "optimizedPoses: id:" << iter->first << ", x:" << iter->second.x() << ", y:" << iter->second.y()
 							  << ", theta:" << iter->second.theta() << std::endl;
+
+					landmarks << "landmarkCounter: " << landmarkCounter << std::endl;
 
 					if(iter->first == landmarkCounter)
 					{
@@ -563,7 +708,7 @@ public:
 				//landmarkPose.x() -= landmarkCorrection.x();
 				//landmarkPose.y() -= landmarkCorrection.y();
 				//landmarkPose.z() -= landmarkCorrection.z();
-				//landmarks<<"Map correction: "<<mapCorrection.x()<<","<<mapCorrection.y()<<","<<mapCorrection.z()<<","<<mapCorrection.theta()<<std::endl;
+				//landmarks<<"Map correction: x:"<<mapCorrection.x()<<", y:"<<mapCorrection.y()<<", z:"<<", theta:"<<mapCorrection.theta()<<std::endl;
 				//landmarks<<"Landmark correction: "<<landmarkCorrection.x()<<","<<landmarkCorrection.y()<<","<<landmarkCorrection.z()<<","<<landmarkCorrection.theta()<<std::endl;
 				mapToOdom_ = mapCorrection;
 				mapToOdomMutex_.unlock();
@@ -713,7 +858,7 @@ public:
 			rtabmap_ros::transformToGeometryMsg(landmarkPose, msg.transform);
 			tfBroadcaster_.sendTransform(msg);
 
-			ROS_INFO_STREAM("Marker published with pose "<<landmarkPose.x()<<","<<landmarkPose.y()<<","<<landmarkPose.theta());
+			ROS_INFO_STREAM("Marker published with landmark pose "<<landmarkPose.x()<<","<<landmarkPose.y()<<","<<landmarkPose.theta());
 			//landmarks<<"Marker published with pose "<<landmarkPose.x()<<","<<landmarkPose.y()<<","<<landmarkPose.theta()<<std::endl;
 			landmarks <<"landmarkPose.x(): "<<landmarkPose.x()<<",landmarkPose.y(): "<<landmarkPose.y()<<",landmarkPose.theta(): "<<landmarkPose.theta()<<std::endl;
 			ROS_INFO("Time graph optimization = %f s", timer.ticks());

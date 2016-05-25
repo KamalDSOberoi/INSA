@@ -639,7 +639,7 @@ bool CoreWrapper::commonOdomUpdate(const nav_msgs::OdometryConstPtr & odomMsg)
 		float x,y,z,roll, pitch, yaw;
 		robot_pose.getTranslationAndEulerAngles(x, y, z, roll, pitch, yaw);
 		dataFile << std::endl;
-		dataFile<< "robot_pose: x:" << x<<", y:"<<y<< ", z:"<<z<<", roll:"<<roll<<", pitch:"<<pitch<<", yaw:"<< yaw <<std::endl;
+		dataFile<< "robot_pose: x:" << x<<", y:"<<y<< ", z:"<<z<<", yaw:"<< yaw << ", timestamp: "<< ros::Time::now()<< std::endl;
 
 		visualization_msgs::Marker robotPose_marker;
 
@@ -1041,7 +1041,7 @@ void CoreWrapper::commonDepthCallback(
     cv::Mat landmarkPoseMat = cv::Mat::zeros(2,3, CV_32F);
 
     if(getLandmarkPoseClnt_.call(getlandmarkPoseSrv_))
-    {	
+    {
     	getlandmarkPoseSrv_.request.imgStamp = depthMsgs[0]->header.stamp;
 
     	geometry_msgs::PoseWithCovarianceStamped landmarkPose = getlandmarkPoseSrv_.response.landmarkPose.pose;

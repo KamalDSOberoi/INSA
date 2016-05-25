@@ -74,12 +74,12 @@ public:
 
     bool computeLandmarkPose()
     {
-     component.updateData(data);
-      //file<<"service called and data updated"<<std::endl;
+      component.updateData(data);
       //std::cout<<data.strTimeStamp<<","<<data.adCameraCoordinates[0]<<","<<data.adCameraCoordinates[1]<<","<<data.adCameraCoordinates[2]<<std::endl;
       
       if(newLandmarkObservationReceived(data.strTimeStamp))
       {
+
           lastUpdateTime = data.strTimeStamp;
           //Extract the rotation matrix from the received data
           Eigen::Matrix3d robotToLandmarkOrientation;
@@ -154,10 +154,13 @@ public:
         res.landmarkPose = updateLandmarkPose;
         return true;
       }
-      else{
+
+      else
+      {
         //cout << "req not received" << endl;
         return false;
-        }
+      }
+
     }
 
     //need review because of frams and transformartions , maybe only provide the qbove service and when needed apply the transformation in the desired robot frame 
