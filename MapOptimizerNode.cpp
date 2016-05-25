@@ -303,7 +303,7 @@ public:
 	}*/
 
 	/* Kamal: add new landmark link to constraint rather than linksOut */
-    void createLandmarks(rtabmap_ros::MapDataConstPtr & msg, std::map<int, rtabmap::Transform> &posesOut, std::multimap<int, Link> &constraints)
+    void createLandmarks(rtabmap_ros::MapDataConstPtr & msg, std::map<int, rtabmap::Transform> &poses, std::multimap<int, Link> &constraints)
 	{
 		for(unsigned int i=0; i<msg->nodes.size(); ++i)
 		{
@@ -357,7 +357,7 @@ public:
 				//if the cache is empty; it means it is first time to observe the landmark
 				if(landmarksCache_.empty())
 				{
-					posesOut.insert(std::make_pair(landmarkCounter,landmarkObservation));
+					poses.insert(std::make_pair(landmarkCounter,landmarkObservation));
 					//landmarksCache_.insert(std::make_pair<int, rtabmap::Transform>(currentNode.id,landmarkObservation));
 				}
 					
@@ -400,6 +400,7 @@ public:
 		//Dina Youakim
 		rtabmap_ros::MapDataConstPtr modifiedMapData = msg; 
 		//createLandmarks(modifiedMapData);
+		landmarks << std::endl;
 		landmarks << std::endl;
 		landmarks << "new map data received at:" << modifiedMapData->header.stamp << std::endl;
 
@@ -622,13 +623,17 @@ public:
 
 
 
-				//posesOut.insert(posesOutLandmarks.begin(), posesOutLandmarks.end());
+				poses.insert(posesOutLandmarks.begin(), posesOutLandmarks.end());
 
 
+				landmarks << "before computing connected graph: poses.size():" << poses.size() << ", constraints.size(): " << constraints.size() << std::endl;
 				optimizer_->getConnectedGraph(fromId, poses, constraints, posesOut, linksOut);
                 ROS_INFO_STREAM("connected graph computed");
-                landmarks << "connected graph computed: posesOut.size(): " << posesOut.size() << std::endl;
-                landmarks << "connected graph computed: linksOut.size(): " << linksOut.size() << ", constraints.size(): "<< constraints.size() << std::endl;
+                landmarks << "connected graph computed: posesOut.size(): " << posesOut.size()
+                 		  << ", linksOut.size(): " << linksOut.size() 
+                 		  << ", constraints.size(): "<< constraints.size() 
+                 		  << ", posesOutLandmarks.size(): " << posesOutLandmarks.size()  
+						  << ", posesOutNoLandmarks.size(): " << posesOutNoLandmarks.size() << std::endl;
                 for(std::multimap<int, rtabmap::Link>::iterator iter = linksOut.begin(); iter != linksOut.end(); ++iter)
 				{
 					landmarks << "linksOut: between " << iter->second.from() << " to " << iter->second.to() << std::endl; 
@@ -637,8 +642,6 @@ public:
 				{
 					landmarks << "constraint between " << iter->second.from() << " to " << iter->second.to() << std::endl; 
 				}
-                landmarks << "connected graph computed: posesOutLandmarks.size(): " << posesOutLandmarks.size()  
-						  << ", posesOutNoLandmarks.size(): " << posesOutNoLandmarks.size() << std::endl;
 				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutLandmarks.begin(); iter != posesOutLandmarks.end(); ++iter)
 				{
 					landmarks << "posesOutLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
@@ -651,8 +654,7 @@ public:
 
                 posesOutNoLandmarks = posesOut;
 
-
-
+                landmarks << std::endl;
                 landmarks << "posesOutLandmarks.size(): " << posesOutLandmarks.size() << ", posesOutNoLandmarks.size(): " << posesOutNoLandmarks.size() << std::endl;
                 for(std::map<int, rtabmap::Transform>::iterator iter = posesOutLandmarks.begin(); iter != posesOutLandmarks.end(); ++iter)
 				{
@@ -662,6 +664,9 @@ public:
 				{
 					landmarks << "posesOutNoLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
 				}
+
+
+				landmarks << std::endl;
 				for (std::multimap<int, rtabmap::Link>::iterator iter = linksOut.begin(); iter != linksOut.end(); ++iter)
 				{
 					landmarks << "linksOut: link.from(): " << iter->second.from() << ", link.to(): " << iter->second.to() << std::endl;
