@@ -349,7 +349,6 @@ public:
 				//link.setInfMatrix() ???;
 				//link.setVariance() ???;
 				constraints.insert(std::make_pair(link.from(),link));
-				linksOut.insert(std::make_pair(link.from(),link));
 				landmarks << "new landmark link created from "<< currentNode.id << " to " << landmarkCounter << std::endl;
 
 
