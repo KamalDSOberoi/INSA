@@ -171,7 +171,7 @@ public:
 	}
 
 	/* Dina Youakim */
-	void fillOldLandmarks(rtabmap_ros::MapDataConstPtr & msg,std::map<int, rtabmap::Transform> &posesOut, std::multimap<int, rtabmap::Link> &linksOut)
+	void fillOldLandmarks(rtabmap_ros::MapDataConstPtr & msg,std::map<int, rtabmap::Transform> &posesOut, std::multimap<int, rtabmap::Link> &constraints)
 	{
 		
 		if(!landmarksCache_.empty())
@@ -182,7 +182,7 @@ public:
 			{
 				//Landmark pose in base_link frame
 				rtabmap::Transform landmarkObservation = iter->second;
-				rtabmap::Transform landmarkToRobotPose ;
+				rtabmap::Transform landmarkToRobotPose;
 				for (unsigned int i=0; i<msg->nodes.size(); ++i)
 				{
 					if(msg->nodes[i].id == iter->first)
@@ -211,7 +211,7 @@ public:
 				link.setTo (landmarkCounter);
 				link.setType (rtabmap::Link::kLandmark);
 				link.setTransform(landmarkToRobotPose);
-				linksOut.insert(std::make_pair(link.from(),link));
+				constraints.insert(std::make_pair(link.from(),link));
 
 				landmarks << "old landmarks filled" << std::endl;
 
@@ -229,78 +229,6 @@ public:
 		}
 
 	}
-
-    /* Dina Youakim*/
-    /*void createLandmarks(rtabmap_ros::MapDataConstPtr & msg, std::map<int, rtabmap::Transform> &posesOut, std::multimap<int, rtabmap::Link> &linksOut)
-	{
-		for(unsigned int i=0; i<msg->nodes.size(); ++i)
-		{
-			rtabmap_ros::NodeData currentNode = msg->nodes[i];
-			
-			if(!currentNode.userData.empty())
-			{
-				cv::Mat landmark = cv::Mat::zeros(2,3, CV_32F);
-
-				landmark = rtabmap::uncompressData(currentNode.userData);
-
-				rtabmap::Transform landmarkObservation(landmark.at<float>(0,0),landmark.at<float>(0,1),landmark.at<float>(0,2),
-					                                   landmark.at<float>(1,0),landmark.at<float>(1,1),landmark.at<float>(1,2));
-
-				double roll, pitch, yaw;
-				tf::Quaternion quat;
-    			tf::quaternionMsgToTF(currentNode.pose.orientation, quat);
-				tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-
-				rtabmap::Transform robotPose(currentNode.pose.position.x, currentNode.pose.position.y, currentNode.pose.position.z, roll, pitch, yaw);
-				rtabmap::Transform landmarkToRobotPose =  (robotPose)*landmarkObservation;
-				
-				//landmarks<<"observed at time: "<<currentNode.stamp<<", for node: "<<currentNode.id<<std::endl;
-
-				float r,p,y;
-				landmarkObservation.getEulerAngles(r,p,y);
-
-				landmarks << "landmark counter: " << landmarkCounter << std::endl;
-				
-				//landmarks<<"landmark node created between "<<currentNode.id<<","<<landmarkCounter<<std::endl;
-				//landmarks<<"the landmark pose is: "<<landmarkObservation.translation().x()<<","<<landmarkObservation.translation().y()<<","<<landmarkObservation.theta()<<std::endl;
-			    //landmarks<<"the landmark constraint is: "<<landmarkToRobotPose.translation().x()<<","<<landmarkToRobotPose.translation().y()<<","<<landmarkToRobotPose.theta()<<std::endl;*
-
-				//landmarks<< "landmark observed at: x:" << landmarkObservation.translation().x()<<", y:"<<landmarkObservation.translation().y()<<", theta:"<<landmarkObservation.theta()<<std::endl;
-				landmarks<< "landmark observed at: x:" << landmarkObservation.x()<<", y:"<<landmarkObservation.y()<<", theta:"<<landmarkObservation.theta()<<std::endl;
-
-				// Create landmark link
-				rtabmap::Link link;
-				link.setFrom(currentNode.id);
-				link.setTo (landmarkCounter);
-				link.setType (rtabmap::Link::kLandmark);
-				link.setTransform(landmarkToRobotPose);
-				//link.setInfMatrix() ???;
-				//link.setVariance() ???;
-				linksOut.insert(std::make_pair(link.from(),link));
-				landmarks << "new landmark link created from "<< currentNode.id << " to " << landmarkCounter << std::endl;
-
-
-				//std::map<int,std::vector< rtabmap::Transform > >::iterator  it;
-
-				//if the cache is empty; it means it is first time to observe the landmark
-				if(landmarksCache_.empty())
-				{
-					posesOut.insert(std::make_pair(landmarkCounter,landmarkObservation));
-					//landmarksCache_.insert(std::make_pair<int, rtabmap::Transform>(currentNode.id,landmarkObservation));
-				}
-					
-				landmarksCache_.insert(std::make_pair<int, rtabmap::Transform>(currentNode.id,landmarkObservation));				
-
-				ROS_INFO_STREAM("New Landmarks created");
-
-				
-			}
-			
-		}
-
-		landmarks<<"current landmark cache size is: "<<landmarksCache_.size()<<std::endl;
-
-	}*/
 
 	/* Kamal: add new landmark link to constraint rather than linksOut */
     void createLandmarks(rtabmap_ros::MapDataConstPtr & msg, std::map<int, rtabmap::Transform> &poses, std::multimap<int, Link> &constraints)
@@ -400,34 +328,21 @@ public:
 
 		//Dina Youakim
 		rtabmap_ros::MapDataConstPtr modifiedMapData = msg; 
-		//createLandmarks(modifiedMapData);
-		landmarks << std::endl;
 		landmarks << std::endl;
 		landmarks << "new map data received at:" << modifiedMapData->header.stamp << std::endl;
 
-		/*for(unsigned int i = 0; i < modifiedMapData->nodes.size(); ++i)
+		for(unsigned int i = 0; i < modifiedMapData->nodes.size(); ++i)
 		{
 			rtabmap_ros::NodeData currentNode = msg->nodes[i];
 
 			if(currentNode.userData.empty())                              // userdata is in robot_frame
 				landmarks << "user data empty" << std::endl;
 			else
-			{
 				landmarks << "user data not empty" << std::endl;
+		}
 
-				cv::Mat userData = cv::Mat::zeros(2,3, CV_32F);
-				userData = rtabmap::uncompressData(currentNode.userData);
-				for (unsigned int i = 0; i < userData.rows; i++)
-				{
-					for(unsigned int j = 0; j < userData.cols; j++)
-					{
-						landmarks << "mapReceivedCallback: in robot_frame: userData(" <<i<<","<<j<<"): " << userData.at<float>(i,j) << std::endl;
-					}
-					 
-				}
-			}
-		}*/
 
+		landmarks << "modifiedMapData->graph.links.size(): " << modifiedMapData->graph.links.size() << std::endl;
 
 		std::multimap<int, Link> newConstraints;
 		for(unsigned int i = 0; i < modifiedMapData->graph.links.size(); ++i)
@@ -456,8 +371,8 @@ public:
 
 			if(!edgeAlreadyAdded)
 			{
-				landmarks<<"new constraint added from node "<<link.from()<<" to node "<<link.to()<<std::endl; //" with values: x: "<<link.transform().x()<<",y: "<<link.transform().y()<<",theta: "<<link.transform().theta()<<std::endl;
 				cachedConstraints_.insert(std::make_pair(link.from(), link));
+				landmarks<<"new constraint added from node "<<link.from()<<" to node "<<link.to()<<std::endl; 
 			}
 
 		}
@@ -485,10 +400,6 @@ public:
                      <<", pose.y(): "<<pose.y()<<", pose.z(): "<<pose.z()<<", pose.theta(): "<<pose.theta()<<std::endl;       // robot poses
 		
 		}
-		
-		/*landmarks << "modifiedMapData->nodes.size(): " << modifiedMapData->nodes.size() << std::endl;
-		landmarks << "modifiedMapData->graph.links.size(): " << modifiedMapData->graph.links.size()<< std::endl;
-		landmarks << "newNodeInfos.size(): " << newNodeInfos.size() << std::endl;*/
 
 		if(dataChanged)
 		{
@@ -558,6 +469,7 @@ public:
 
 			if(poses.size() > 1 && constraints.size() > 0)
 			{
+				std::cout << "In first if condition" << std::endl;
 				
 				int fromId = optimizeFromLastNode_ ? poses.rbegin()->first : poses.begin()->first;
 
@@ -610,11 +522,11 @@ public:
 				}
 				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutLandmarks.begin(); iter != posesOutLandmarks.end(); ++iter)
 				{
-					landmarks << "posesOutLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+					landmarks << "posesOutLandmarks: id:" << iter->first << ", x: "<< iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
 				}
 				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutNoLandmarks.begin(); iter != posesOutNoLandmarks.end(); ++iter)
 				{
-					landmarks << "posesOutNoLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+					landmarks << "posesOutNoLandmarks: id:" << iter->first << ", x: "<< iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl;  
 				}
 
 
@@ -640,44 +552,19 @@ public:
 				}
 				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutLandmarks.begin(); iter != posesOutLandmarks.end(); ++iter)
 				{
-					landmarks << "posesOutLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+					landmarks << "posesOutLandmarks: id:" << iter->first << ", x: "<< iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl;  
 				}
 				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutNoLandmarks.begin(); iter != posesOutNoLandmarks.end(); ++iter)
 				{
-					landmarks << "posesOutNoLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
+					landmarks << "posesOutNoLandmarks: id:" << iter->first << ", x: "<< iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl;  
 				}
-
-
-				landmarks << std::endl;
-                landmarks << "posesOutLandmarks.size(): " << posesOutLandmarks.size() << ", posesOutNoLandmarks.size(): " << posesOutNoLandmarks.size() << std::endl;
-                for(std::map<int, rtabmap::Transform>::iterator iter = posesOutLandmarks.begin(); iter != posesOutLandmarks.end(); ++iter)
-				{
-					landmarks << "posesOutLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
-				}
-				for(std::map<int, rtabmap::Transform>::iterator iter = posesOutNoLandmarks.begin(); iter != posesOutNoLandmarks.end(); ++iter)
-				{
-					landmarks << "posesOutNoLandmarks: x:" << iter->second.x()<<", y:" << iter->second.y() << ", theta:" << iter->second.theta() << std::endl; 
-				}
-
-
-				landmarks << std::endl;
 				for (std::multimap<int, rtabmap::Link>::iterator iter = linksOut.begin(); iter != linksOut.end(); ++iter)
 				{
 					landmarks << "linksOut: link.from(): " << iter->second.from() << ", link.to(): " << iter->second.to() << std::endl;
 				}
 
-
-
-
 				//optimizedPoses = optimizer_->optimizeWithLandmarks(fromId, posesOut, linksOut);   // optimizedPoses is of type std::map<int, Transform>
 				optimizedPoses = optimizer_->optimize(fromId, posesOut, linksOut);   // optimizedPoses is of type std::map<int, Transform>
-
-				/*for (std::map<int, Transform>::iterator iter = posesOutNoLandmarks.begin(); iter != posesOutNoLandmarks.end(); ++iter)
-				{
-					if(optimizedPoses.find(iter->first))
-						robotOptimizedPoses.insert(std::make_pair<int,Transform>(iter->first,iter->second));
-				}*/
-				//landmarks<<"optimization result:"<<std::endl;
 				
 				for (std::map<int, Transform>::iterator iter = optimizedPoses.begin(); iter != optimizedPoses.end(); ++iter)
 				{
@@ -689,17 +576,17 @@ public:
 					if(iter->first == landmarkCounter)
 					{
 						landmarkPose = iter->second;
-
 						//landmarkPose = optimizedPoses.at(posesOutLandmarks.begin()->first);
 						//landmarks<<"last landmark pose chosen: "<<landmarkPose.x()<<","<<landmarkPose.y()<<","<<landmarkPose.theta()<<std::endl;
 						break;
 					}
 				}
-				mapToOdomMutex_.lock();
 
 				currentRobotPose = optimizedPoses.at(posesOutNoLandmarks.rbegin()->first);
-				/*landmarks << "currentRobotPose.x(): " << currentRobotPose.x() << ",currentRobotPose.y(): " << currentRobotPose.y()
-						  << ",currentRobotPose.theta: " << currentRobotPose.theta() << std::endl;*/
+				landmarks << "currentRobotPose: x:" << currentRobotPose.x() << ", y:" << currentRobotPose.y()
+						  << ", theta:" << currentRobotPose.theta() << std::endl;
+
+				mapToOdomMutex_.lock();
 
 				mapCorrection = currentRobotPose * posesOutNoLandmarks.rbegin()->second.inverse();
 				//landmarkCorrection = optimizedPoses.at(posesOutLandmarks.rbegin()->first) * posesOutLandmarks.rbegin()->second.inverse();
@@ -716,6 +603,7 @@ public:
 
 			else if(poses.size() == 1 && constraints.size() == 0)
 			{
+				std::cout << "In second if condition" << std::endl;
 
 				optimizedPoses = poses;
 				for(std::map<int,rtabmap::Transform>::iterator it = optimizedPoses.begin(); it != optimizedPoses.end(); ++it)
@@ -730,6 +618,7 @@ public:
 
 			else if(poses.size() || constraints.size())
 			{
+				std::cout << "In third if condition" << std::endl;
 
 				ROS_ERROR("map_optimizer: Poses=%d and edges=%d (poses must "
 					   "not be null if there are edges, and edges must be null if poses <= 1)",
