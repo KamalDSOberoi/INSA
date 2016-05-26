@@ -1095,15 +1095,18 @@ void CoreWrapper::commonDepthCallback(
 	    landmarkPoseMat.at<float>(1,1)=pitch;
 	    landmarkPoseMat.at<float>(1,2)=yaw;*/
 
-    	landmarkPoseMat.at<float>(0,0)=xr;          // in base_link (robot frame)     
-	    landmarkPoseMat.at<float>(0,1)=yr;
-	    landmarkPoseMat.at<float>(0,2)=zr;
-	    landmarkPoseMat.at<float>(1,0)=roll_r;
-	    landmarkPoseMat.at<float>(1,1)=pitch_r;
-	    landmarkPoseMat.at<float>(1,2)=yaw_r;
+    	landmarkPoseMat.at<float>(0,0)=xo;          // in odom frame     
+	    landmarkPoseMat.at<float>(0,1)=yo;
+	    landmarkPoseMat.at<float>(0,2)=zo;
+	    landmarkPoseMat.at<float>(1,0)=roll_o;
+	    landmarkPoseMat.at<float>(1,1)=pitch_o;
+	    landmarkPoseMat.at<float>(1,2)=yaw_o;
 
 	    //Kamal
 	    //landmarkPosePub_.publish(landmarkPose);  // in camera_landmark frame
+
+	    /*dataFile<<"Dina landmark pose: x:"<<landmarkPose.pose.pose.position.x<<", y:"<<landmarkPose.pose.pose.position.x<<", z:"<<landmarkPose.pose.pose.position.x
+	    		<<", roll:"<<roll<<", pitch:"<<pitch<<", yaw:" << yaw<< std::endl;*/
 
 	    dataFile<<"landmark pose in camera_landmark: x:"<<xc<<", y:"<<yc<<", z:"<<zc<<", roll:"<<roll_c<<", pitch:"<<pitch_c<<", yaw:" << yaw_c<< std::endl;	    
 	    dataFile<<"landmark pose in robot frame: x:"<< xr <<", y:"<< yr <<", z:"<< zr<<", roll:"<<roll_r<<", pitch:"<<pitch_r<<", yaw:" << yaw_r << std::endl;
@@ -1118,16 +1121,7 @@ void CoreWrapper::commonDepthCallback(
 			depth,
 			cameraModels,
 			lastPoseIntermediate_?-1:imageMsgs[0]->header.seq,
-			rtabmap_ros::timestampFromROS(stamp), landmarkPoseMat);
-
-	/*SensorData data(scan,
-			scan2dMsg.get() != 0?(int)scan2dMsg->ranges.size():genMaxScanPts,
-			scan2dMsg.get() != 0?scan2dMsg->range_max:(genScan_?genScanMaxDepth_:0.0f),
-			rgb,
-			depth,
-			cameraModels,
-			lastPoseIntermediate_?-1:imageMsgs[0]->header.seq,
-			rtabmap_ros::timestampFromROS(stamp));*/
+			rtabmap_ros::timestampFromROS(stamp), landmarkPoseMat);       // landmarkPoseMat is the userData for the node. 
 
 	
 	data.setGroundTruth(groundTruthPose);
