@@ -1,0 +1,289 @@
+file initialized in MapOptimizer
+
+new map data received at:1464268377.179087631
+user data not empty
+modifiedMapData->graph.links.size(): 0
+robot_pose: nodeId: 1, pose.x(): 0, pose.y(): 0, pose.z(): 0, pose.theta(): 0
+Optimization enabled!!!!!
+optimizedPoses: id:1, x:0, y:0, theta:0
+landmarkPose.x(): 0,landmarkPose.y(): 0,landmarkPose.theta(): 0
+
+new map data received at:1464268379.852652065
+user data empty
+modifiedMapData->graph.links.size(): 0
+robot_pose: nodeId: 1, pose.x(): 0, pose.y(): 0, pose.z(): 0, pose.theta(): 0
+Optimization enabled!!!!!
+optimizedPoses: id:1, x:0, y:0, theta:0
+landmarkPose.x(): 0,landmarkPose.y(): 0,landmarkPose.theta(): 0
+
+new map data received at:1464268384.186412327
+user data empty
+modifiedMapData->graph.links.size(): 0
+robot_pose: nodeId: 1, pose.x(): 0, pose.y(): 0, pose.z(): 0, pose.theta(): 0
+Optimization enabled!!!!!
+optimizedPoses: id:1, x:0, y:0, theta:0
+landmarkPose.x(): 0,landmarkPose.y(): 0,landmarkPose.theta(): 0
+
+new map data received at:1464268390.359908573
+user data empty
+modifiedMapData->graph.links.size(): 0
+robot_pose: nodeId: 1, pose.x(): 0, pose.y(): 0, pose.z(): 0, pose.theta(): 0
+Optimization enabled!!!!!
+optimizedPoses: id:1, x:0, y:0, theta:0
+landmarkPose.x(): 0,landmarkPose.y(): 0,landmarkPose.theta(): 0
+
+new map data received at:1464268395.098415129
+user data empty
+modifiedMapData->graph.links.size(): 0
+robot_pose: nodeId: 1, pose.x(): 0, pose.y(): 0, pose.z(): 0, pose.theta(): 0
+Optimization enabled!!!!!
+optimizedPoses: id:1, x:0, y:0, theta:0
+landmarkPose.x(): 0,landmarkPose.y(): 0,landmarkPose.theta(): 0
+
+new map data received at:1464268400.138529531
+user data empty
+modifiedMapData->graph.links.size(): 0
+robot_pose: nodeId: 1, pose.x(): 0, pose.y(): 0, pose.z(): 0, pose.theta(): 0
+Optimization enabled!!!!!
+optimizedPoses: id:1, x:0, y:0, theta:0
+landmarkPose.x(): 0,landmarkPose.y(): 0,landmarkPose.theta(): 0
+
+new map data received at:1464268405.277070276
+user data empty
+user data not empty
+modifiedMapData->graph.links.size(): 1
+new constraint added from node 1 to node 7
+robot_pose: nodeId: 1, pose.x(): 0, pose.y(): 0, pose.z(): 0, pose.theta(): 0
+robot_pose: nodeId: 7, pose.x(): 0.258347, pose.y(): -0.0116377, pose.z(): 0.0408343, pose.theta(): -0.00735762
+constraint between 1 to 7
+Optimization enabled!!!!!
+after fillOldLandmarks: posesOut.size(): 0, linksOut.size(): 0, constraints.size(): 1after fillOldLandmarks: posesOutLandmarks.size(): 0, posesOutNoLandmarks.size(): 0
+after fillOldLandmarks: constraint between 1 to 7
+landmark counter: 8
+new landmark link created from 7 to 8
+current landmark cache size is: 1
+after createLandmarks: posesOut.size(): 0, linksOut.size(): 0, constraints.size(): 2, posesOutLandmarks.size(): 1, posesOutNoLandmarks.size(): 0
+constraint between 1 to 7
+constraint between 7 to 8
+posesOutLandmarks: id:8, x: 3.44143, y:0.64271, theta:-3.13278
+before computing connected graph: poses.size():3, constraints.size(): 2
+connected graph computed: posesOut.size(): 3, linksOut.size(): 2, constraints.size(): 2, posesOutLandmarks.size(): 1, posesOutNoLandmarks.size(): 2
+linksOut: between 1 to 7
+linksOut: between 7 to 8
+constraint between 1 to 7
+constraint between 7 to 8
+posesOutLandmarks: id:8, x: 3.44143, y:0.64271, theta:-3.13278
+posesOutNoLandmarks: id:1, x: 0, y:0, theta:0
+posesOutNoLandmarks: id:7, x: 0.258347, y:-0.0116377, theta:-0.00735762
+linksOut: link.from(): 1, link.to(): 7
+linksOut: link.from(): 7, link.to(): 8
+optimizedPoses: id:1, x:0, y:0, theta:0
+landmarkCounter: 8
+optimizedPoses: id:7, x:0.258347, y:-0.0116377, theta:-0.00735762
+landmarkCounter: 8
+optimizedPoses: id:8, x:3.9681, y:0.566514, theta:3.13569
+landmarkCounter: 8
+currentRobotPose: x:0.258347, y:-0.0116377, theta:-0.00735762
+landmarkPose.x(): 3.9681,landmarkPose.y(): 0.566514,landmarkPose.theta(): 3.13569
+
+new map data received at:1464268411.715796701
+user data empty
+user data empty
+user data not empty
+modifiedMapData->graph.links.size(): 2
+new constraint added from node 7 to node 8
+robot_pose: nodeId: 1, pose.x(): 0, pose.y(): 0, pose.z(): 0, pose.theta(): 0
+robot_pose: nodeId: 7, pose.x(): 0.258347, pose.y(): -0.0116377, pose.z(): 0.0408343, pose.theta(): -0.00735762
+robot_pose: nodeId: 8, pose.x(): 0.522779, pose.y(): -0.00208172, pose.z(): 0.0612342, pose.theta(): -0.0159015
+constraint between 1 to 7
+constraint between 7 to 8
+Optimization enabled!!!!!
+start inserting old landmark nodes 
+old landmarks filled
+landmark node created between 7,9
+the landmark pose is: 3.44143,0.64271,-3.13278
+the landmark constraint is: 3.70488,0.605589,0
+after fillOldLandmarks: posesOut.size(): 0, linksOut.size(): 0, constraints.size(): 3after fillOldLandmarks: posesOutLandmarks.size(): 1, posesOutNoLandmarks.size(): 0
+after fillOldLandmarks: constraint between 1 to 7
+after fillOldLandmarks: constraint between 7 to 8
+after fillOldLandmarks: constraint between 7 to 9
+after fillOldLandmarks: posesOutLandmarks: x:3.44143, y:0.64271, theta:-3.13278
+landmark counter: 9
+new landmark link created from 8 to 9
+current landmark cache size is: 2
+after createLandmarks: posesOut.size(): 0, linksOut.size(): 0, constraints.size(): 4, posesOutLandmarks.size(): 1, posesOutNoLandmarks.size(): 0
+constraint between 1 to 7
+constraint between 7 to 8
+constraint between 7 to 9
+constraint between 8 to 9
+posesOutLandmarks: id:9, x: 3.44143, y:0.64271, theta:-3.13278
+before computing connected graph: poses.size():4, constraints.size(): 4
+connected graph computed: posesOut.size(): 4, linksOut.size(): 4, constraints.size(): 4, posesOutLandmarks.size(): 1, posesOutNoLandmarks.size(): 3
+linksOut: between 1 to 7
+linksOut: between 7 to 8
+linksOut: between 7 to 9
+linksOut: between 8 to 9
+constraint between 1 to 7
+constraint between 7 to 8
+constraint between 7 to 9
+constraint between 8 to 9
+posesOutLandmarks: id:9, x: 3.44143, y:0.64271, theta:-3.13278
+posesOutNoLandmarks: id:1, x: 0, y:0, theta:0
+posesOutNoLandmarks: id:7, x: 0.258347, y:-0.0116377, theta:-0.00735762
+posesOutNoLandmarks: id:8, x: 0.522779, y:-0.00208172, theta:-0.0159015
+linksOut: link.from(): 1, link.to(): 7
+linksOut: link.from(): 7, link.to(): 8
+linksOut: link.from(): 7, link.to(): 9
+linksOut: link.from(): 8, link.to(): 9
+optimizedPoses: id:1, x:0, y:0, theta:0
+landmarkCounter: 9
+optimizedPoses: id:7, x:0.258347, y:-0.0116377, theta:-0.00735762
+landmarkCounter: 9
+optimizedPoses: id:8, x:0.522644, y:-0.00207574, theta:-0.015504
+landmarkCounter: 9
+optimizedPoses: id:9, x:4.03127, y:0.563707, theta:3.13157
+landmarkCounter: 9
+currentRobotPose: x:0.522644, y:-0.00207574, theta:-0.015504
+landmarkPose.x(): 4.03127,landmarkPose.y(): 0.563707,landmarkPose.theta(): 3.13157
+
+new map data received at:1464268416.954704754
+user data empty
+user data empty
+user data empty
+modifiedMapData->graph.links.size(): 3
+robot_pose: nodeId: 1, pose.x(): 0, pose.y(): 0, pose.z(): 0, pose.theta(): 0
+robot_pose: nodeId: 7, pose.x(): 0.258347, pose.y(): -0.0116377, pose.z(): 0.0408343, pose.theta(): -0.00735762
+robot_pose: nodeId: 8, pose.x(): 0.522779, pose.y(): -0.00208172, pose.z(): 0.0612342, pose.theta(): -0.0159015
+constraint between 1 to 7
+constraint between 7 to 8
+Optimization enabled!!!!!
+start inserting old landmark nodes 
+old landmarks filled
+landmark node created between 7,9
+the landmark pose is: 3.44143,0.64271,-3.13278
+the landmark constraint is: 3.70488,0.605589,0
+old landmarks filled
+landmark node created between 8,9
+the landmark pose is: 3.03282,0.66724,-3.12424
+the landmark constraint is: 3.5645,0.61747,0
+after fillOldLandmarks: posesOut.size(): 0, linksOut.size(): 0, constraints.size(): 4after fillOldLandmarks: posesOutLandmarks.size(): 1, posesOutNoLandmarks.size(): 0
+after fillOldLandmarks: constraint between 1 to 7
+after fillOldLandmarks: constraint between 7 to 8
+after fillOldLandmarks: constraint between 7 to 9
+after fillOldLandmarks: constraint between 8 to 9
+after fillOldLandmarks: posesOutLandmarks: x:3.44143, y:0.64271, theta:-3.13278
+current landmark cache size is: 2
+after createLandmarks: posesOut.size(): 0, linksOut.size(): 0, constraints.size(): 4, posesOutLandmarks.size(): 1, posesOutNoLandmarks.size(): 0
+constraint between 1 to 7
+constraint between 7 to 8
+constraint between 7 to 9
+constraint between 8 to 9
+posesOutLandmarks: id:9, x: 3.44143, y:0.64271, theta:-3.13278
+before computing connected graph: poses.size():4, constraints.size(): 4
+connected graph computed: posesOut.size(): 4, linksOut.size(): 4, constraints.size(): 4, posesOutLandmarks.size(): 1, posesOutNoLandmarks.size(): 3
+linksOut: between 1 to 7
+linksOut: between 7 to 8
+linksOut: between 7 to 9
+linksOut: between 8 to 9
+constraint between 1 to 7
+constraint between 7 to 8
+constraint between 7 to 9
+constraint between 8 to 9
+posesOutLandmarks: id:9, x: 3.44143, y:0.64271, theta:-3.13278
+posesOutNoLandmarks: id:1, x: 0, y:0, theta:0
+posesOutNoLandmarks: id:7, x: 0.258347, y:-0.0116377, theta:-0.00735762
+posesOutNoLandmarks: id:8, x: 0.522779, y:-0.00208172, theta:-0.0159015
+linksOut: link.from(): 1, link.to(): 7
+linksOut: link.from(): 7, link.to(): 8
+linksOut: link.from(): 7, link.to(): 9
+linksOut: link.from(): 8, link.to(): 9
+optimizedPoses: id:1, x:0, y:0, theta:0
+landmarkCounter: 9
+optimizedPoses: id:7, x:0.258347, y:-0.0116377, theta:-0.00735762
+landmarkCounter: 9
+optimizedPoses: id:8, x:0.522644, y:-0.00207574, theta:-0.015504
+landmarkCounter: 9
+optimizedPoses: id:9, x:4.03127, y:0.563707, theta:3.13157
+landmarkCounter: 9
+currentRobotPose: x:0.522644, y:-0.00207574, theta:-0.015504
+landmarkPose.x(): 4.03127,landmarkPose.y(): 0.563707,landmarkPose.theta(): 3.13157
+
+new map data received at:1464268422.497078411
+user data empty
+user data empty
+user data empty
+user data not empty
+modifiedMapData->graph.links.size(): 4
+new constraint added from node 8 to node 10
+robot_pose: nodeId: 1, pose.x(): 0, pose.y(): 0, pose.z(): 0, pose.theta(): 0
+robot_pose: nodeId: 7, pose.x(): 0.258347, pose.y(): -0.0116377, pose.z(): 0.0408343, pose.theta(): -0.00735762
+robot_pose: nodeId: 8, pose.x(): 0.522779, pose.y(): -0.00208172, pose.z(): 0.0612342, pose.theta(): -0.0159015
+robot_pose: nodeId: 10, pose.x(): 0.58141, pose.y(): -0.238918, pose.z(): 0.0816229, pose.theta(): 0.27534
+constraint between 1 to 7
+constraint between 7 to 8
+constraint between 8 to 10
+Optimization enabled!!!!!
+start inserting old landmark nodes 
+old landmarks filled
+landmark node created between 7,11
+the landmark pose is: 3.44143,0.64271,-3.13278
+the landmark constraint is: 3.70488,0.605589,0
+old landmarks filled
+landmark node created between 8,11
+the landmark pose is: 3.03282,0.66724,-3.12424
+the landmark constraint is: 3.5645,0.61747,0
+after fillOldLandmarks: posesOut.size(): 0, linksOut.size(): 0, constraints.size(): 5after fillOldLandmarks: posesOutLandmarks.size(): 1, posesOutNoLandmarks.size(): 0
+after fillOldLandmarks: constraint between 1 to 7
+after fillOldLandmarks: constraint between 7 to 8
+after fillOldLandmarks: constraint between 7 to 11
+after fillOldLandmarks: constraint between 8 to 10
+after fillOldLandmarks: constraint between 8 to 11
+after fillOldLandmarks: posesOutLandmarks: x:3.44143, y:0.64271, theta:-3.13278
+landmark counter: 11
+new landmark link created from 10 to 11
+current landmark cache size is: 3
+after createLandmarks: posesOut.size(): 0, linksOut.size(): 0, constraints.size(): 6, posesOutLandmarks.size(): 1, posesOutNoLandmarks.size(): 0
+constraint between 1 to 7
+constraint between 7 to 8
+constraint between 7 to 11
+constraint between 8 to 10
+constraint between 8 to 11
+constraint between 10 to 11
+posesOutLandmarks: id:11, x: 3.44143, y:0.64271, theta:-3.13278
+before computing connected graph: poses.size():5, constraints.size(): 6
+connected graph computed: posesOut.size(): 5, linksOut.size(): 6, constraints.size(): 6, posesOutLandmarks.size(): 1, posesOutNoLandmarks.size(): 4
+linksOut: between 1 to 7
+linksOut: between 7 to 8
+linksOut: between 7 to 11
+linksOut: between 8 to 10
+linksOut: between 8 to 11
+linksOut: between 10 to 11
+constraint between 1 to 7
+constraint between 7 to 8
+constraint between 7 to 11
+constraint between 8 to 10
+constraint between 8 to 11
+constraint between 10 to 11
+posesOutLandmarks: id:11, x: 3.44143, y:0.64271, theta:-3.13278
+posesOutNoLandmarks: id:1, x: 0, y:0, theta:0
+posesOutNoLandmarks: id:7, x: 0.258347, y:-0.0116377, theta:-0.00735762
+posesOutNoLandmarks: id:8, x: 0.522779, y:-0.00208172, theta:-0.0159015
+posesOutNoLandmarks: id:10, x: 0.58141, y:-0.238918, theta:0.27534
+linksOut: link.from(): 1, link.to(): 7
+linksOut: link.from(): 7, link.to(): 8
+linksOut: link.from(): 7, link.to(): 11
+linksOut: link.from(): 8, link.to(): 10
+linksOut: link.from(): 8, link.to(): 11
+linksOut: link.from(): 10, link.to(): 11
+optimizedPoses: id:1, x:0, y:0, theta:0
+landmarkCounter: 11
+optimizedPoses: id:7, x:0.258347, y:-0.0116377, theta:-0.00735762
+landmarkCounter: 11
+optimizedPoses: id:8, x:0.522645, y:-0.00207542, theta:-0.0155015
+landmarkCounter: 11
+optimizedPoses: id:10, x:0.58137, y:-0.238888, theta:0.275745
+landmarkCounter: 11
+optimizedPoses: id:11, x:4.03087, y:0.563558, theta:3.13157
+landmarkCounter: 11
+currentRobotPose: x:0.58137, y:-0.238888, theta:0.275745
+landmarkPose.x(): 4.03087,landmarkPose.y(): 0.563558,landmarkPose.theta(): 3.13157
