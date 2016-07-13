@@ -763,6 +763,7 @@ bool CoreWrapper::commonOdomTFUpdate(const ros::Time & stamp)
 		Transform odom = getTransform(odomFrameId_, frameId_, stamp);
 		if(odom.isNull())
 		{
+			//dataFile << "commonOdomTFUpdate: odom is empty" << std::endl;
 			return false;
 		}
 
@@ -869,6 +870,7 @@ void CoreWrapper::commonDepthCallback(
 	Transform odomT = getTransform(odomFrameId, frameId_, lastPoseStamp_);
 	if(odomT.isNull() && !odomFrameId_.empty())
 	{
+		dataFile<<"commonDepthCallback: odom is empty" << std::endl;
 		ROS_WARN("Could not get TF transform from %s to %s, sensors will not be synchronized with odometry pose.",
 				odomFrameId.c_str(), frameId_.c_str());
 	}
@@ -1075,8 +1077,7 @@ void CoreWrapper::commonDepthCallback(
     	//get transform from camera_landmark to odom 
     	//camera_landmark to base
     	Transform cameraLandmarkInOptm = getTransform(optmFrameId_, landmarkPose.header.frame_id, landmarkPose.header.stamp);
-    	//Transform cameraToBaseT = getTransform(landmarkPose.header.frame_id, frameId_, landmarkPose.header.stamp);
-    	if(cameraLandmarkInOptm.isNull())  // cameraLandmarkInBase => static
+    	if(cameraLandmarkInOptm.isNull())  // cameraLandmarkInOptm => static
 		{
 			dataFile<<ros::Time::now()<<" can not get pose of "<<landmarkPose.header.frame_id<<" in "<<optmFrameId_<<" at "<<landmarkPose.header.stamp<<std::endl;
 			//dataFile<<ros::Time::now()<<" can not get transform from "<<landmarkPose.header.frame_id<<" to "<<frameId_<<" at "<<landmarkPose.header.stamp<<std::endl;
@@ -1084,24 +1085,18 @@ void CoreWrapper::commonDepthCallback(
 		
 		//base to odom
 		Transform baseInOdomT = getTransform(odomFrameId, frameId_, lastPoseStamp_);
-		//Transform baseToOdomT = getTransform(frameId_, odomFrameId, lastPoseStamp_);
     	if(baseInOdomT.isNull())
 		{
 			dataFile<<ros::Time::now()<<" can not get pose of "<<frameId_<<" in "<<odomFrameId<<" at "<<lastPoseStamp_<<std::endl;
 			//dataFile<<ros::Time::now()<<" can not get transform from "<<frameId_<<" to "<<odomFrameId<<" at "<<lastPoseStamp_<<std::endl;
 		}
 
-		Transform optmInOdomT = getTransform(odomFrameId, optmFrameId_, lastPoseStamp_);
-		if(optmInOdomT.isNull())
-		{
-			dataFile<<ros::Time::now()<<" can not get pose of "<<optmFrameId_<<" in "<<odomFrameId<<" at "<<lastPoseStamp_<<std::endl;
-			//dataFile<<ros::Time::now()<<" can not get transform from "<<frameId_<<" to "<<odomFrameId<<" at "<<lastPoseStamp_<<std::endl;
-		}
+		
 
 		float b2o_x, b2o_y, b2o_z, b2o_roll, b2o_pitch, b2o_yaw; 
 	    float c2b_x, c2b_y, c2b_z, c2b_roll, c2b_pitch, c2b_yaw;
 	    baseInOdomT.getTranslationAndEulerAngles(b2o_x, b2o_y, b2o_z, b2o_roll, b2o_pitch, b2o_yaw);
-	    //cameraLandmarkInOptm.getTranslationAndEulerAngles(c2b_x, c2b_y, c2b_z, c2b_roll, c2b_pitch, c2b_yaw);
+	    cameraLandmarkInOptm.getTranslationAndEulerAngles(c2b_x, c2b_y, c2b_z, c2b_roll, c2b_pitch, c2b_yaw);
 
 
 
@@ -1127,26 +1122,19 @@ void CoreWrapper::commonDepthCallback(
 	    */
 
 
-    	/*Transform landmarkInCameraLandmark = rtabmap_ros::transformFromPoseMsg(landmarkPose.pose.pose);
+    	Transform landmarkInCameraLandmark = rtabmap_ros::transformFromPoseMsg(landmarkPose.pose.pose);
     	float xc,yc,zc,roll_c, pitch_c, yaw_c;
     	landmarkInCameraLandmark.getTranslationAndEulerAngles(xc, yc, zc, roll_c, pitch_c, yaw_c);
     	dataFile<<"landmarkInCameraLandmark: x:"<<xc<<", y:"<<yc<<", z:"<<zc<<", roll:" << roll_c<<", pitch:" << pitch_c<<", yaw:" << yaw_c<< std::endl;
     	
 
-    	Transform landmarkInBase = (cameraLandmarkInBase)*(landmarkInCameraLandmark);
-    	robotPose.push_back(landmarkInBase);
+    	Transform landmarkInOptm = (cameraLandmarkInOptm)*(landmarkInCameraLandmark);
+    	robotPose.push_back(landmarkInOptm);
     	float xr,yr,zr,roll_r, pitch_r, yaw_r;
-    	landmarkInBase.getTranslationAndEulerAngles(xr, yr, zr, roll_r, pitch_r, yaw_r);
-    	dataFile<<"landmarkInBase: x:"<< xr <<", y:"<< yr <<", z:"<< zr<<", roll:" << roll_r <<", pitch:" << pitch_r <<", yaw:" << yaw_r <<std::endl;
+    	landmarkInOptm.getTranslationAndEulerAngles(xr, yr, zr, roll_r, pitch_r, yaw_r);
+    	dataFile<<"landmarkInOptm: x:"<< xr <<", y:"<< yr <<", z:"<< zr<<", roll:" << roll_r <<", pitch:" << pitch_r <<", yaw:" << yaw_r <<std::endl;
 
     	dataFile << "baseInOdomT: x:"<<b2o_x<<", y:"<<b2o_y<<", z:"<<b2o_z<<", roll:"<<b2o_roll<<", pitch:"<<b2o_pitch<<", yaw:"<<b2o_yaw<<std::endl;
-
-    	Transform landmarkInOdom = (baseInOdomT)*landmarkInBase;
-    	landmarkInOdomV.push_back(landmarkInOdom);
-    	float xo,yo,zo,roll_o, pitch_o, yaw_o;
-    	landmarkInOdom.getTranslationAndEulerAngles(xo, yo, zo, roll_o, pitch_o, yaw_o);
-    	dataFile<<"landmarkInOdom: x:"<< xo <<", y:"<< yo <<", z:"<< zo <<", roll:" << roll_o<<", pitch:" << pitch_o<<", yaw:" << yaw_o<< std::endl;*/
-
 
 	    
 	    /* find robot pose using optimetre system only */
@@ -1154,28 +1142,22 @@ void CoreWrapper::commonDepthCallback(
 	    float r2o_x2, r2o_y2, r2o_z2, r2o_roll2, r2o_pitch2, r2o_yaw2; 
 	    Transform first, last, robot; 
 	    
-	    if(robotPose.size() > 1)
-	    {
 
-	    	first = robotPose.front();
-	    	last = robotPose.back();
-	    	robot = first * (last.inverse());
+	    first = robotPose.front();
+	    last = robotPose.back();
+	    robot = first * (last.inverse());
 	    	
-	    	first.getTranslationAndEulerAngles(xf, yf, zf, rollf, pitchf, yawf);
-	    	last.getTranslationAndEulerAngles(xl, yl, zl, rolll, pitchl, yawl);
-	    	robot.getTranslationAndEulerAngles(r2o_x2, r2o_y2, r2o_z2, r2o_roll2, r2o_pitch2, r2o_yaw2);
+	    first.getTranslationAndEulerAngles(xf, yf, zf, rollf, pitchf, yawf);
+	    last.getTranslationAndEulerAngles(xl, yl, zl, rolll, pitchl, yawl);
+	    robot.getTranslationAndEulerAngles(r2o_x2, r2o_y2, r2o_z2, r2o_roll2, r2o_pitch2, r2o_yaw2);
 
 
- 			dataFile<<"first: x:"<<xf<<", y:"<<yf<<", z:"<<zf<<", roll:"<<rollf<<", pitch:"<<pitchf<<", yaw:"<<yawf<<std::endl;
- 			dataFile<<"last: x:"<<xl<<", y:"<<yl<<", z:"<<zl<<", roll:"<<rolll<<", pitch:"<<pitchl<<", yaw:"<<yawl<<std::endl;
- 		    dataFile<<"robot: x:"<<r2o_x2<<", y:"<<r2o_y2<<", z:"<<r2o_z2<<", roll:"<<r2o_roll2<<", pitch:"<<r2o_pitch2<<", yaw:"<<r2o_yaw2<<std::endl;
+ 		//dataFile<<"first: x:"<<xf<<", y:"<<yf<<", z:"<<zf<<", roll:"<<rollf<<", pitch:"<<pitchf<<", yaw:"<<yawf<<std::endl;
+ 		//dataFile<<"last: x:"<<xl<<", y:"<<yl<<", z:"<<zl<<", roll:"<<rolll<<", pitch:"<<pitchl<<", yaw:"<<yawl<<std::endl;
+ 		dataFile<<"robot: x:"<<r2o_x2<<", y:"<<r2o_y2<<", z:"<<r2o_z2<<", roll:"<<r2o_roll2<<", pitch:"<<r2o_pitch2<<", yaw:"<<r2o_yaw2<<std::endl;
  		    
- 		    optmFile<<r2o_x2<<","<<r2o_y2<<std::endl;
-
-	    }
-
-	    
-
+ 
+        /* broadcast odom->optm_link transform (robot pose calculated using landmarks) */
 	    geometry_msgs::TransformStamped robotPoseOptmMsg;
 		robotPoseOptmMsg.child_frame_id = optmFrameId_;              
 		robotPoseOptmMsg.header.frame_id = odomFrameId_;          
@@ -1183,17 +1165,29 @@ void CoreWrapper::commonDepthCallback(
 		rtabmap_ros::transformToGeometryMsg(robot, robotPoseOptmMsg.transform);
 		tfBroadcaster_.sendTransform(robotPoseOptmMsg);
 
+		Transform optmInOdomT = getTransform(odomFrameId, optmFrameId_, lastPoseStamp_);
+		if(!optmInOdomT.isNull())
+		{
+			dataFile<<"odom->optm_link not null"<<std::endl;
+			Transform landmarkInOdom = optmInOdomT * landmarkInOptm;
+    		float xo,yo,zo,roll_o, pitch_o, yaw_o;
+    		landmarkInOdom.getTranslationAndEulerAngles(xo, yo, zo, roll_o, pitch_o, yaw_o);
+    		dataFile<<"landmarkInOdom: x:"<< xo <<", y:"<< yo <<", z:"<< zo <<", roll:" << roll_o<<", pitch:" << pitch_o<<", yaw:" << yaw_o<< std::endl;
+
+    		/* Mat for userData passed to SensorData and read by map_optimizer */
+    		landmarkPoseMat.at<float>(0,0)=xo;                  
+	    	landmarkPoseMat.at<float>(0,1)=yo;
+	    	landmarkPoseMat.at<float>(0,2)=zo;                      // in odom
+	    	landmarkPoseMat.at<float>(1,0)=roll_o;
+	    	landmarkPoseMat.at<float>(1,1)=pitch_o;
+	    	landmarkPoseMat.at<float>(1,2)=yaw_o;
+
+		}
 
 
 
 
-	    /* Mat for userData passed to SensorData and read by map_optimizer */
-    	/*landmarkPoseMat.at<float>(0,0)=xo;                  
-	    landmarkPoseMat.at<float>(0,1)=yo;
-	    landmarkPoseMat.at<float>(0,2)=zo;                      // in odom
-	    landmarkPoseMat.at<float>(1,0)=roll_o;
-	    landmarkPoseMat.at<float>(1,1)=pitch_o;
-	    landmarkPoseMat.at<float>(1,2)=yaw_o;*/
+	    
 
 
 

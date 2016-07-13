@@ -174,6 +174,7 @@ public:
 	/* Dina Youakim */
 	void fillOldLandmarks(rtabmap_ros::MapDataConstPtr & msg,std::map<int, rtabmap::Transform> &posesOut, std::multimap<int, rtabmap::Link> &constraints)
 	{
+		landmarks<<"Start fillOldLandmarks:"<<std::endl;
 		
 		if(!landmarksCache_.empty())
 		{
@@ -225,15 +226,17 @@ public:
 				landmarks<<"the landmark constraint is: "<<landmarkToRobotPose.translation().x()<<","<<landmarkToRobotPose.translation().y()
 				         <<","<<landmarkToRobotPose.translation().theta()<<std::endl;
 			}
-
-			ROS_INFO_STREAM("Old Landmarks filled");
 		}
+
+		ROS_INFO_STREAM("Old Landmarks filled");
+		landmarks<<"End fillOldLandmarks"<<std::endl;
 
 	}
 
 	/* Kamal: add new landmark link to constraint rather than linksOut */
     void createLandmarks(rtabmap_ros::MapDataConstPtr & msg, std::map<int, rtabmap::Transform> &poses, std::multimap<int, Link> &constraints)
 	{
+		landmarks<<"Start createLandmarks:"<<std::endl;
 		for(unsigned int i=0; i<msg->nodes.size(); ++i)
 		{
 			rtabmap_ros::NodeData currentNode = msg->nodes[i];
@@ -294,6 +297,7 @@ public:
 				landmarksCache_.insert(std::make_pair<int, rtabmap::Transform>(currentNode.id,landmarkObservation));				
 
 				ROS_INFO_STREAM("New Landmarks created");
+				landmarks<<"End createLandmarks"<<std::endl;
 				
 			}
 			
@@ -613,8 +617,8 @@ public:
 				}
 
 
-				posesOutNoLandmarks = poses;
-				poses.insert(posesOutLandmarks.begin(), posesOutLandmarks.end());
+				posesOutNoLandmarks = poses;   // poses contains the robot poses
+				poses.insert(posesOutLandmarks.begin(), posesOutLandmarks.end());  // now it contains landmark poses as well 
 
 
 				landmarks << "before computing connected graph: poses.size():" << poses.size() << ", constraints.size(): " << constraints.size() << std::endl;
@@ -661,6 +665,8 @@ public:
 						landmarkPose = iter->second;
 						//landmarkPose = optimizedPoses.at(posesOutLandmarks.begin()->first);
 						//landmarks<<"last landmark pose chosen: "<<landmarkPose.x()<<","<<landmarkPose.y()<<","<<landmarkPose.theta()<<std::endl;
+						landmarks <<"landmarkPose: x:"<<landmarkPose.x()<<", y:"<<landmarkPose.y()<<", z:"<<landmarkPose.z()
+					              <<", theta:"<<landmarkPose.theta()<<std::endl;
 						break;
 					}
 				}
@@ -678,6 +684,7 @@ public:
 				//landmarkPose.z() -= landmarkCorrection.z();
 				landmarks<<"mapCorrection: x:"<<mapCorrection.x()<<", y:"<<mapCorrection.y()<<", z:"<<mapCorrection.z()<<", theta:"<<mapCorrection.theta()<<std::endl;
 				//landmarks<<"Landmark correction: "<<landmarkCorrection.x()<<","<<landmarkCorrection.y()<<","<<landmarkCorrection.z()<<","<<landmarkCorrection.theta()<<std::endl;
+				
 				mapToOdom_ = mapCorrection;
 				mapToOdomMutex_.unlock();
 			}
@@ -773,7 +780,7 @@ public:
 
 			//landmarkPose = mapCorrection*landmarkPose;
 			
-			/*visualization_msgs::Marker marker;
+			visualization_msgs::Marker marker;
 			marker.header.frame_id = mapFrameId_;
 			marker.header.stamp = ros::Time::now();
 			marker.ns = "landmark";
@@ -818,7 +825,7 @@ public:
 			marker2.color.b = 0.0;
 
 			marker2.type = visualization_msgs::Marker::CUBE;
-			robotPosePub_.publish(marker2);*/
+			robotPosePub_.publish(marker2);
 
 
 
@@ -830,8 +837,6 @@ public:
 			tfBroadcaster_.sendTransform(msg);
 
 			ROS_INFO_STREAM("Marker published with landmark pose "<<landmarkPose.x()<<","<<landmarkPose.y()<<","<<landmarkPose.theta());
-			//landmarks<<"Marker published with pose "<<landmarkPose.x()<<","<<landmarkPose.y()<<","<<landmarkPose.theta()<<std::endl;
-			landmarks <<"landmarkPose.x():"<<landmarkPose.x()<<", landmarkPose.y():"<<landmarkPose.y()<<", landmarkPose.z():"<<landmarkPose.z()<<", landmarkPose.theta():"<<landmarkPose.theta()<<std::endl;
 			ROS_INFO("Time graph optimization = %f s", timer.ticks());
 		}
 	}
