@@ -20,8 +20,10 @@ Author Dina Youakim
 #include "landmarks_detection/LandmarkPose.h"
 
 #include "landmark_detection.h"
+//#include "featureMatching.h"
 
 landmarkDetection detect_landmark;
+//featureMatching match_features;
 
 class LandmarkDetection
 {
@@ -80,69 +82,98 @@ public:
       if(newLandmarkObservationReceived(data.strTimeStamp))
       {
 
-          lastUpdateTime = data.strTimeStamp;
-          //Extract the rotation matrix from the received data
-          Eigen::Matrix3d robotToLandmarkOrientation;
-          robotToLandmarkOrientation(0,0) = data.adFrameAttitude[0][0];
-          robotToLandmarkOrientation(0,1) = data.adFrameAttitude[0][1];
-          robotToLandmarkOrientation(0,2) = data.adFrameAttitude[0][2];
-          robotToLandmarkOrientation(1,0) = data.adFrameAttitude[1][0];
-          robotToLandmarkOrientation(1,1) = data.adFrameAttitude[1][1];
-          robotToLandmarkOrientation(1,2) = data.adFrameAttitude[1][2];
+        lastUpdateTime = data.strTimeStamp;
 
-          Eigen::Vector3d ea = robotToLandmarkOrientation.eulerAngles(0, 1, 2); 
-          //ROS_INFO_STREAM("Euler angles: "<< ea);
-          //TODO: add file for landmarks logs and check the timestamps and verify the angles by getting the inverse again
-          /*
-          Matrix3f n;
-          n = AngleAxisf(ea[0], Vector3f::UnitX())
-         *AngleAxisf(ea[1], Vector3f::UnitY())
-         *AngleAxisf(ea[2], Vector3f::UnitZ()); 
-          */
+        /* rotation matrix */
+        Eigen::Matrix3d landmarkToCameraRotation;
+        landmarkToCameraRotation(0,0) = data.adFrameAttitude[0][0];
+        landmarkToCameraRotation(0,1) = data.adFrameAttitude[0][1];
+        landmarkToCameraRotation(0,2) = data.adFrameAttitude[0][2];
+        landmarkToCameraRotation(1,0) = data.adFrameAttitude[1][0];
+        landmarkToCameraRotation(1,1) = data.adFrameAttitude[1][1];
+        landmarkToCameraRotation(1,2) = data.adFrameAttitude[1][2];
+        landmarkToCameraRotation(2,0) = data.adFrameAttitude[2][0];
+        landmarkToCameraRotation(2,1) = data.adFrameAttitude[2][1];
+        landmarkToCameraRotation(2,2) = data.adFrameAttitude[2][2];
+
+        Eigen::Vector3d ea = landmarkToCameraRotation.eulerAngles(0,1,2);
+        //file<<"roll,pitch,yaw: "<<ea[0]<<", "<<ea[1]<<", "<<ea[2]<<std::endl;
 
 
-         //Extract the translation vector from the received data
-         Eigen::Translation<double,3> robotToLandmarkTranslation (data.adCameraCoordinates[0] ,data.adCameraCoordinates[1] ,data.adCameraCoordinates[2]);
-         //Eigen::Translation<double,3> robotToLandmarkTranslation (572,786,-1606);
+
+        /* correction rotation matrix */
+        Eigen::AngleAxisd rollAngle(0.0, Eigen::Vector3d::UnitX());
+        Eigen::AngleAxisd pitchAngle(3.14, Eigen::Vector3d::UnitY());
+        Eigen::AngleAxisd yawAngle(0.0, Eigen::Vector3d::UnitZ());
+        Eigen::Quaternion<double> qt = yawAngle * pitchAngle * rollAngle;
+        Eigen::Matrix3d rotationMatrix = qt.matrix();
+
+        Eigen::Matrix3d landmarkToCameraRotationCorrected = landmarkToCameraRotation * rotationMatrix;
+
+        Eigen::Vector3d ea1 = landmarkToCameraRotationCorrected.eulerAngles(0,1,2);
+        //file<<"roll,pitch,yaw corrected: "<<ea1[0]<<", "<<ea1[1]<<", "<<ea1[2]<<std::endl;
 
 
-         //Construct the affine transformation matrix including both rotation and translation [R T] --> to check here if i can use straight the rotation matrix
-         Eigen::Quaterniond robotToLandmarkRotation(robotToLandmarkOrientation);
 
-         Eigen::Transform <double,3,Eigen::Affine> robotToLandmark = robotToLandmarkTranslation*robotToLandmarkRotation;
-         Eigen::Transform <double,3,Eigen::Affine> landmarkToRobot = robotToLandmark.inverse();
-         //Eigen::Transform <double,3,Eigen::Affine> robotToLandmark2 = landmarkToRobot.inverse();
-         //Eigen::Quaterniond robotToLandmarkOrientation = Eigen::Quaterniond(landmarkToRobot.toRotationMatrix());
+        /* corrected rotation transform */
+        Eigen::Transform<double, 3, Eigen::Affine> r;
+        r = landmarkToCameraRotationCorrected; 
 
 
-         geometry_msgs::PoseWithCovarianceStamped landmarkPose; 
-         landmarkPose.header.stamp = ros::Time::now();
-         landmarkPose.header.frame_id = "camera_landmark";
-         landmarkPose.pose.pose.position.x = landmarkToRobot.translation().x()/1000;
-         landmarkPose.pose.pose.position.y = landmarkToRobot.translation().y()/1000;
-         landmarkPose.pose.pose.position.z = landmarkToRobot.translation().z()/1000;
+
+        /* translation transform*/ 
+        Eigen::Translation<double, 3> landmarkToCameraTranslation(data.adCameraCoordinates[0], data.adCameraCoordinates[1], data.adCameraCoordinates[2]);
+        Eigen::Transform<double, 3, Eigen::Affine> t;
+        t = (landmarkToCameraTranslation);
+
+
+
+        /* transformation */ 
+        Eigen::Transform<double, 3, Eigen::Affine> landmarkToCameraTransform = r * t;
+        Eigen::Transform<double, 3, Eigen::Affine> cameraToLandmarkTransform = landmarkToCameraTransform.inverse();
+
+        //Eigen::Quaternionf q1(landmarkToCameraTransform.rotation());
+        //Eigen::Matrix3f mat = q1.matrix();
+        //Eigen::Vector3f ea1 = mat.eulerAngles(0,1,2);
+        //file<<"roll, pitch, yaw from transformation:"<<ea1[0]<<", "<<ea1[1]<<", "<<ea1[2]<<std::endl;
+
+
+        /* Pose Msg */ 
+        geometry_msgs::PoseWithCovarianceStamped landmarkPose; 
+        landmarkPose.header.stamp = ros::Time::now();
+        landmarkPose.header.frame_id = "camera_landmark";
+        landmarkPose.pose.pose.position.x = cameraToLandmarkTransform.translation().x()/1000;
+        landmarkPose.pose.pose.position.y = cameraToLandmarkTransform.translation().y()/1000;
+        landmarkPose.pose.pose.position.z = cameraToLandmarkTransform.translation().z()/1000;
          
-         Eigen::Quaterniond landmarkToRobotOrientation (landmarkToRobot.rotation());
-         landmarkPose.pose.pose.orientation.x = landmarkToRobotOrientation.x();
-         landmarkPose.pose.pose.orientation.y = landmarkToRobotOrientation.y();
-         landmarkPose.pose.pose.orientation.z = landmarkToRobotOrientation.z();
-         landmarkPose.pose.pose.orientation.w = landmarkToRobotOrientation.w();
-         tf::Quaternion q (landmarkPose.pose.pose.orientation.x,landmarkPose.pose.pose.orientation.y,landmarkPose.pose.pose.orientation.z,landmarkPose.pose.pose.orientation.w);
-         double roll, pitch, yaw;
-         tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
-         //file<<"Landmark To Robot: "<<
-         file << "x: " << landmarkPose.pose.pose.position.x << ",y: " << landmarkPose.pose.pose.position.y
-              <<",z: "<< landmarkPose.pose.pose.position.z << ",roll: " << roll << ",pitch: " << pitch << ",yaw: "<< yaw << std::endl;
-         //ROS_INFO_STREAM("Robot To Landmark: "<<robotToLandmark.translation()<<","<<robotToLandmark.rotation());
-         updateLandmarkPose.header = landmarkPose.header;
-         updateLandmarkPose.isNew = true;
-         updateLandmarkPose.pose = landmarkPose;
-         //file<<"return success"<<std::endl;
-         return true;
-        }
-        //file<<"return failure"<<std::endl;
+        Eigen::Quaterniond cameraToLandmarkOrientation(cameraToLandmarkTransform.rotation());
+
+        landmarkPose.pose.pose.orientation.x = cameraToLandmarkOrientation.x();
+        landmarkPose.pose.pose.orientation.y = cameraToLandmarkOrientation.y();
+        landmarkPose.pose.pose.orientation.z = cameraToLandmarkOrientation.z();
+        landmarkPose.pose.pose.orientation.w = cameraToLandmarkOrientation.w();
+
+        tf::Quaternion q(landmarkPose.pose.pose.orientation.x,landmarkPose.pose.pose.orientation.y,landmarkPose.pose.pose.orientation.z,landmarkPose.pose.pose.orientation.w);
+        
+        double roll, pitch, yaw;
+        tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
+         
+        //file << "landmarkInCamera: x: " << landmarkPose.pose.pose.position.x << ", y: " << landmarkPose.pose.pose.position.y
+          //   <<", z: "<< landmarkPose.pose.pose.position.z <<", roll: "<< roll <<", pitch: "<< pitch << ", yaw: "<< yaw << std::endl;
+         
+        //ROS_INFO_STREAM("Robot To Landmark: "<<robotToLandmark.translation()<<","<<robotToLandmark.rotation());
+        updateLandmarkPose.header = landmarkPose.header;
+        updateLandmarkPose.isNew = true;
+        updateLandmarkPose.pose = landmarkPose;
+        //file<<"return success"<<std::endl;
+        return true;
+      }
+
+      else
+      {
+        ROS_WARN("Nothing received from Optimetre System");
         return false;
-      
+      }
     }
 
     bool GetLandmarkPose (landmarks_detection::GetLandmarkPose::Request &req, landmarks_detection::GetLandmarkPose::Response &res)
@@ -231,15 +262,20 @@ int main(int argc, char** argv)
   ros::ServiceClient getLandmarkPoseClnt_;
   landmarks_detection::GetLandmarkPose getlandmarkPoseSrv_;
   ros::Publisher landmarkPosePub_;
-  ros::Subscriber kinectSub;
+  ros::Subscriber kinectLandmarkDetectionSub, kinectRGBSub, kinectDepthSub;
     
   getLandmarkPoseClnt_ = nh.serviceClient<landmarks_detection::GetLandmarkPose>("/getLandmarkPose");      // service
 
   //landmarkPosePub_ = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("/landmark/pose",10);
-  kinectSub = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 50, boost::bind(&landmarkDetection::imageReceived, &detect_landmark, _1));
+  
+  kinectLandmarkDetectionSub = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 50, boost::bind(&landmarkDetection::imageReceivedCallback, &detect_landmark, _1));
+  
+  //kinectRGBSub = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 50, boost::bind(&featureMatching::rgbReceivedCallback, &match_features, _1));
+  //kinectDepthSub = nh.subscribe<sensor_msgs::Image>("/camera/depth/image_rect_raw", 50, boost::bind(&featureMatching::depthReceivedCallback, &match_features, _1));
   
   while(ros::ok())
-  {   
+  { 
+
     if(landmarkDetectionMgr.computeLandmarkPose())
     { 
         //this landmark pose is in camera_landmark frame, 
@@ -251,7 +287,7 @@ int main(int argc, char** argv)
     }
       
       ros::spinOnce();
-      sleep(0.5);
+      sleep(1.0);
   }
 
  

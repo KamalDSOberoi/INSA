@@ -59,6 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <octomap_msgs/conversions.h>
 #endif
 
+#define BAD_COVARIANCE 9999
 
 //msgs
 #include "rtabmap_ros/Info.h"
@@ -79,8 +80,9 @@ CoreWrapper::CoreWrapper(bool deleteDbOnStart, const ParametersMap & parameters)
 		transVariance_(0),
 		latestNodeWasReached_(false),
 		frameId_("base_link"),
+		optmFrameId_("optm_link"),
 		mapFrameId_("map"),
-		odomFrameId_(""),
+		odomFrameId_("odom"),
 		groundTruthFrameId_(""), // e.g., "world"
 		configPath_(""),
 		databasePath_(UDirectory::homeDir()+"/.ros/"+rtabmap::Parameters::getDefaultDatabaseName()),
@@ -218,6 +220,7 @@ CoreWrapper::CoreWrapper(bool deleteDbOnStart, const ParametersMap & parameters)
 
 	//Dina
 	robotPoseMarkerPub_ =  nh.advertise<visualization_msgs::Marker>("robot_pose_marker", 1); //rostopic list => /rtabmap/robot_pose_marker: publisher = /rtabmap/rtabmap
+	robotPoseMarkerPub2_ =  nh.advertise<visualization_msgs::Marker>("robot_pose_marker2", 1);
     robotPosePub_ = nh.advertise<nav_msgs::Odometry>("localisation_pose", 1); //rostopic list => /rtabmap/localisation_pose: publisher = /rtabmap/rtabmap
 
     //Kamal
@@ -422,6 +425,9 @@ CoreWrapper::CoreWrapper(bool deleteDbOnStart, const ParametersMap & parameters)
     dataFile.open("../localization_data.txt");
     dataFile << "file initialized in CoreWrapper" << std::endl;
 
+    kinectFile.open("../kinectFile.txt");
+    optmFile.open("../optmFile.txt");
+
 	int optimizeIterations = 0;
 	Parameters::parse(parameters_, Parameters::kOptimizerIterations(), optimizeIterations);
 	if(publishTf && optimizeIterations != 0)
@@ -619,9 +625,9 @@ bool CoreWrapper::commonOdomUpdate(const nav_msgs::OdometryConstPtr & odomMsg)
 	if(!paused_)
 	{
 		Transform odom = rtabmap_ros::transformFromPoseMsg(odomMsg->pose.pose);
-		if(!lastPose_.isIdentity() && (odom.isIdentity() || odomMsg->pose.covariance[0] >= 9999))
+		if(!lastPose_.isIdentity() && !odom.isNull() && (odom.isIdentity() || odomMsg->pose.covariance[0] >= BAD_COVARIANCE && odomMsg->twist.covariance[0] >= BAD_COVARIANCE))
 		{
-			UWARN("Odometry is reset (identity pose or high variance (%f) detected). Increment map id!", odomMsg->pose.covariance[0]);
+			UWARN("Odometry is reset (identity pose or high variance (%f) detected). Increment map id!", MAX(odomMsg->pose.covariance[0], odomMsg->twist.covariance[0]));
 			rtabmap_.triggerNewMap();
 			rotVariance_ = 0;
 			transVariance_ = 0;
@@ -634,20 +640,29 @@ bool CoreWrapper::commonOdomUpdate(const nav_msgs::OdometryConstPtr & odomMsg)
 		/*Dina Youakim publish robot pose and its marker for visualization*/
 		/*odomMsg->header.frame_id = odom; odomMsg->child_frame_id = base_link*/
 
-		Transform robot_pose = mapToOdom_*odom;
+		Transform robot_pose = mapToOdom_*odom;           // mapToOdom_ => after map correction; odomMsg => odomToBase transform published by OdometryROS
+
+		float xm,ym,zm,rollm, pitchm, yawm, xod,yod,zod,rollod, pitchod, yawod;
+		mapToOdom_.getTranslationAndEulerAngles(xm,ym,zm,rollm, pitchm, yawm);
+		odom.getTranslationAndEulerAngles(xod,yod,zod,rollod, pitchod, yawod);
+
+		dataFile << std::endl;
+		//dataFile << "mapToOdom_: x:" << xm << ", y:" << ym << ", z:" << zm << ", yaw:" << yawm << std::endl;
+		//dataFile << "odom: x:" << xod << ", y:" << yod << ", z:" << zod << ", yaw:" << yawod << std::endl;
 
 		float x,y,z,roll, pitch, yaw;
 		robot_pose.getTranslationAndEulerAngles(x, y, z, roll, pitch, yaw);
-		dataFile << std::endl;
-		dataFile<< "robot_pose: x:" << x<<", y:"<<y<< ", z:"<<z<<", yaw:"<< yaw << ", timestamp: "<< ros::Time::now()<< std::endl;
+		
+		//dataFile<< "robot_pose in map frame: x:" << x<<", y:"<<y<< ", z:"<<z<<", yaw:"<< yaw << ", timestamp: "<< ros::Time::now()<< std::endl;
+		//kinectFile<<x<<","<<y<<std::endl;
 
-		visualization_msgs::Marker robotPose_marker;
+		/*visualization_msgs::Marker robotPose_marker;
 
 		robotPose_marker.header.frame_id = mapFrameId_;
 		robotPose_marker.header.stamp = ros::Time();
 		robotPose_marker.ns = "robot_pose_marker";          //namespace
-		robotPose_marker.id = markerCounter;
-		markerCounter ++;
+		robotPose_marker.id = markerCounter1;
+		markerCounter1 ++;
 		robotPose_marker.type = visualization_msgs::Marker::ARROW;
 		robotPose_marker.action = visualization_msgs::Marker::ADD;
 		robotPose_marker.pose.position.x = x;
@@ -665,21 +680,22 @@ bool CoreWrapper::commonOdomUpdate(const nav_msgs::OdometryConstPtr & odomMsg)
 		robotPose_marker.color.r = 0.5;
 		robotPose_marker.color.g = 0.5;
 		robotPose_marker.color.b = 0.0;
-		robotPoseMarkerPub_.publish(robotPose_marker);
+		robotPoseMarkerPub_.publish(robotPose_marker);*/
 
 		nav_msgs::Odometry robotPose_odom, robotPose_map;
 
-		rtabmap_ros::transformToPoseMsg(odom,robotPose_odom.pose.pose);
+		/*rtabmap_ros::transformToPoseMsg(odom,robotPose_odom.pose.pose);
 		robotPose_odom.header.stamp = ros::Time::now();
-		robotPose_odom.header.frame_id = odomFrameId_; 
-		robotPose_odom.child_frame_id = frameId_;
+		robotPose_odom.header.frame_id = odomFrameId_;      //odom
+		robotPose_odom.child_frame_id = frameId_;*/           //base_link 
+
+		//robotPosePub_.publish(robotPose_odom);
+		//sleep(1.0);  
 
 		rtabmap_ros::transformToPoseMsg(robot_pose,robotPose_map.pose.pose);
 		robotPose_map.header.stamp = ros::Time::now();
-		robotPose_map.header.frame_id = mapFrameId_;
+		robotPose_map.header.frame_id = mapFrameId_;         //map
 		
-		robotPosePub_.publish(robotPose_odom);
-		sleep(1.0);
 
 		/*dataFile<< "robotPose_odom: x:" << robotPose_odom.pose.pose.position.x<<", y:"<<robotPose_odom.pose.pose.position.y<<", z:"<<robotPose_odom.pose.pose.position.z
 		        <<", yaw:"<<tf::getYaw(robotPose_odom.pose.pose.orientation)
@@ -689,15 +705,22 @@ bool CoreWrapper::commonOdomUpdate(const nav_msgs::OdometryConstPtr & odomMsg)
 		/*dataFile<<"robotPose_map: x:" <<robotPose_map.pose.pose.position.x<<", y:"<<robotPose_map.pose.pose.position.y<<", z:"<<robotPose_map.pose.pose.position.z
                 <<", yaw:"<<tf::getYaw(robotPose_map.pose.pose.orientation) << std::endl;*/
 
-		float transVariance = uMax3(odomMsg->pose.covariance[0], odomMsg->pose.covariance[7], odomMsg->pose.covariance[14]);
-		float rotVariance = uMax3(odomMsg->pose.covariance[21], odomMsg->pose.covariance[28], odomMsg->pose.covariance[35]);
-		if(uIsFinite(rotVariance) && rotVariance > rotVariance_)
+		// Only update variance if odom is not null
+		if(!odom.isNull())
 		{
-			rotVariance_ = rotVariance;
-		}
-		if(uIsFinite(transVariance) && transVariance > transVariance_)
-		{
-			transVariance_ = transVariance;
+			// using MIN in case of 3DoF mapping (maybe not parameters are set, except x and yaw for the twist)
+			float transVariance = uMax3(odomMsg->twist.covariance[0], MIN(odomMsg->twist.covariance[7], BAD_COVARIANCE), MIN(odomMsg->twist.covariance[14], BAD_COVARIANCE));
+			float rotVariance = uMax3(MIN(odomMsg->twist.covariance[21], BAD_COVARIANCE), MIN(odomMsg->twist.covariance[28], BAD_COVARIANCE), MIN(odomMsg->twist.covariance[35], BAD_COVARIANCE));
+
+			if(uIsFinite(rotVariance) && rotVariance > rotVariance_)
+			{
+		 		rotVariance_ = rotVariance;
+			}
+
+			if(uIsFinite(transVariance) && transVariance > transVariance_)
+			{
+				transVariance_ = transVariance;
+			}
 		}
 
 		// Throttle
@@ -1047,72 +1070,173 @@ void CoreWrapper::commonDepthCallback(
     	geometry_msgs::PoseWithCovarianceStamped landmarkPose = getlandmarkPoseSrv_.response.landmarkPose.pose;
         
     	
-
-
-    	//this landmark pose is in camera_landmark frame, it needs to be converted to odom frame in order to be processed in the graph optimizer correctly--> not sure maybe i need map frame  	
+    	/* this landmark pose is in camera_landmark frame, it needs to be converted to odom frame in order to be processed in the graph optimizer correctly--> not 
+    	   sure maybe i need map frame */  	
     	//get transform from camera_landmark to odom 
     	//camera_landmark to base
-    	//Transform cameraToBaseT = getTransform(frameId_, landmarkPose.header.frame_id, landmarkPose.header.stamp);
-    	Transform cameraToBaseT = getTransform(landmarkPose.header.frame_id, frameId_, landmarkPose.header.stamp);
-    	if(cameraToBaseT.isNull())
+    	Transform cameraLandmarkInOptm = getTransform(optmFrameId_, landmarkPose.header.frame_id, landmarkPose.header.stamp);
+    	//Transform cameraToBaseT = getTransform(landmarkPose.header.frame_id, frameId_, landmarkPose.header.stamp);
+    	if(cameraLandmarkInOptm.isNull())  // cameraLandmarkInBase => static
 		{
-			//dataFile<<ros::Time::now()<<" can not get transform from "<<frameId_<<" to "<<landmarkPose.header.frame_id<<" at "<<landmarkPose.header.stamp<<std::endl;
-			dataFile<<ros::Time::now()<<" can not get transform from "<<landmarkPose.header.frame_id<<" to "<<frameId_<<" at "<<landmarkPose.header.stamp<<std::endl;
+			dataFile<<ros::Time::now()<<" can not get pose of "<<landmarkPose.header.frame_id<<" in "<<optmFrameId_<<" at "<<landmarkPose.header.stamp<<std::endl;
+			//dataFile<<ros::Time::now()<<" can not get transform from "<<landmarkPose.header.frame_id<<" to "<<frameId_<<" at "<<landmarkPose.header.stamp<<std::endl;
 		}
 		
 		//base to odom
-		//Transform baseToOdomT = getTransform(odomFrameId, frameId_, lastPoseStamp_);
-		Transform baseToOdomT = getTransform(frameId_, odomFrameId, lastPoseStamp_);
-    	if(baseToOdomT.isNull())
+		Transform baseInOdomT = getTransform(odomFrameId, frameId_, lastPoseStamp_);
+		//Transform baseToOdomT = getTransform(frameId_, odomFrameId, lastPoseStamp_);
+    	if(baseInOdomT.isNull())
 		{
-			//dataFile<<ros::Time::now()<<" can not get transform from "<<odomFrameId<<" to "<<frameId_<<" at "<<lastPoseStamp_<<std::endl;
-			dataFile<<ros::Time::now()<<" can not get transform from "<<frameId_<<" to "<<odomFrameId<<" at "<<lastPoseStamp_<<std::endl;
+			dataFile<<ros::Time::now()<<" can not get pose of "<<frameId_<<" in "<<odomFrameId<<" at "<<lastPoseStamp_<<std::endl;
+			//dataFile<<ros::Time::now()<<" can not get transform from "<<frameId_<<" to "<<odomFrameId<<" at "<<lastPoseStamp_<<std::endl;
 		}
 
+		Transform optmInOdomT = getTransform(odomFrameId, optmFrameId_, lastPoseStamp_);
+		if(optmInOdomT.isNull())
+		{
+			dataFile<<ros::Time::now()<<" can not get pose of "<<optmFrameId_<<" in "<<odomFrameId<<" at "<<lastPoseStamp_<<std::endl;
+			//dataFile<<ros::Time::now()<<" can not get transform from "<<frameId_<<" to "<<odomFrameId<<" at "<<lastPoseStamp_<<std::endl;
+		}
 
-    	//Transform landmarkPoseInRobotFrame = (baseToOdomT*cameraToBaseT).inverse()*rtabmap_ros::transformFromPoseMsg(landmarkPose.pose.pose);
-    	Transform landmarkPoseInCameraLandmarkFrame = rtabmap_ros::transformFromPoseMsg(landmarkPose.pose.pose);
-    	Transform landmarkPoseInRobotFrame = (cameraToBaseT)*landmarkPoseInCameraLandmarkFrame;
-    	Transform landmarkPoseInOdom = (baseToOdomT)*landmarkPoseInRobotFrame; 
+		float b2o_x, b2o_y, b2o_z, b2o_roll, b2o_pitch, b2o_yaw; 
+	    float c2b_x, c2b_y, c2b_z, c2b_roll, c2b_pitch, c2b_yaw;
+	    baseInOdomT.getTranslationAndEulerAngles(b2o_x, b2o_y, b2o_z, b2o_roll, b2o_pitch, b2o_yaw);
+	    //cameraLandmarkInOptm.getTranslationAndEulerAngles(c2b_x, c2b_y, c2b_z, c2b_roll, c2b_pitch, c2b_yaw);
 
-        //float x,y,z,roll, pitch, yaw;
-        float xc,yc,zc,roll_c, pitch_c, yaw_c;
+
+
+	    /* Extrinsic calibration between kinect and optimetre camera done 
+	       I have assumed that this calibration is between camera_rgb_optical_frame(kinect) and a frame with z-axis 
+	       along the optical axis of the optimetre camera. This frame is called matlab 
+
+	       matlabInRGBOptical =    1     0.0116     0.0043       0
+	       					    -0.0116     1       0.0062    0.0529
+	       					    -0.0043  -0.0062       1      0.0229
+	       					       0        0          0         1 
+
+	       	Using this extrinsic matrix, I have calculated the tf between camera_link and base_link and have made it static 
+
+	       	cameraLinkInBaseLink =     1     0.0043     0.0062    -0.023
+	       					         0.0042     1      -0.0116     0.045
+	       					         0.0062  0.0116       1       0.0523
+	       					           0        0          0         1
+
+	        We have the tf landmarkInCameraLandmark and we know tf between camera_landmark and base_link (also static)
+	       	So we receive the landmark pose and the point cloud in base_link frame(select directly in rviz)
+
+	    */
+
+
+    	/*Transform landmarkInCameraLandmark = rtabmap_ros::transformFromPoseMsg(landmarkPose.pose.pose);
+    	float xc,yc,zc,roll_c, pitch_c, yaw_c;
+    	landmarkInCameraLandmark.getTranslationAndEulerAngles(xc, yc, zc, roll_c, pitch_c, yaw_c);
+    	dataFile<<"landmarkInCameraLandmark: x:"<<xc<<", y:"<<yc<<", z:"<<zc<<", roll:" << roll_c<<", pitch:" << pitch_c<<", yaw:" << yaw_c<< std::endl;
+    	
+
+    	Transform landmarkInBase = (cameraLandmarkInBase)*(landmarkInCameraLandmark);
+    	robotPose.push_back(landmarkInBase);
     	float xr,yr,zr,roll_r, pitch_r, yaw_r;
+    	landmarkInBase.getTranslationAndEulerAngles(xr, yr, zr, roll_r, pitch_r, yaw_r);
+    	dataFile<<"landmarkInBase: x:"<< xr <<", y:"<< yr <<", z:"<< zr<<", roll:" << roll_r <<", pitch:" << pitch_r <<", yaw:" << yaw_r <<std::endl;
+
+    	dataFile << "baseInOdomT: x:"<<b2o_x<<", y:"<<b2o_y<<", z:"<<b2o_z<<", roll:"<<b2o_roll<<", pitch:"<<b2o_pitch<<", yaw:"<<b2o_yaw<<std::endl;
+
+    	Transform landmarkInOdom = (baseInOdomT)*landmarkInBase;
+    	landmarkInOdomV.push_back(landmarkInOdom);
     	float xo,yo,zo,roll_o, pitch_o, yaw_o;
-
-		//landmarkPoseInRobotFrame.getTranslationAndEulerAngles(x, y, z, roll, pitch, yaw);
-        landmarkPoseInCameraLandmarkFrame.getTranslationAndEulerAngles(xc, yc, zc, roll_c, pitch_c, yaw_c);
-		landmarkPoseInRobotFrame.getTranslationAndEulerAngles(xr, yr, zr, roll_r, pitch_r, yaw_r);
-		landmarkPoseInOdom.getTranslationAndEulerAngles(xo, yo, zo, roll_o, pitch_o, yaw_o);
+    	landmarkInOdom.getTranslationAndEulerAngles(xo, yo, zo, roll_o, pitch_o, yaw_o);
+    	dataFile<<"landmarkInOdom: x:"<< xo <<", y:"<< yo <<", z:"<< zo <<", roll:" << roll_o<<", pitch:" << pitch_o<<", yaw:" << yaw_o<< std::endl;*/
 
 
-		// Mat for userData passed to SensorData and read by map_optimizer
+	    
+	    /* find robot pose using optimetre system only */
+	    float xf, yf, zf, rollf, pitchf, yawf, xl, yl, zl, rolll, pitchl, yawl;
+	    float r2o_x2, r2o_y2, r2o_z2, r2o_roll2, r2o_pitch2, r2o_yaw2; 
+	    Transform first, last, robot; 
+	    
+	    if(robotPose.size() > 1)
+	    {
 
-		/*landmarkPoseMat.at<float>(0,0)=landmarkPose.pose.pose.position.x;      
-	    landmarkPoseMat.at<float>(0,1)=landmarkPose.pose.pose.position.y;
-	    landmarkPoseMat.at<float>(0,2)=landmarkPose.pose.pose.position.z;
-	    landmarkPoseMat.at<float>(1,0)=roll;
-	    landmarkPoseMat.at<float>(1,1)=pitch;
-	    landmarkPoseMat.at<float>(1,2)=yaw;*/
+	    	first = robotPose.front();
+	    	last = robotPose.back();
+	    	robot = first * (last.inverse());
+	    	
+	    	first.getTranslationAndEulerAngles(xf, yf, zf, rollf, pitchf, yawf);
+	    	last.getTranslationAndEulerAngles(xl, yl, zl, rolll, pitchl, yawl);
+	    	robot.getTranslationAndEulerAngles(r2o_x2, r2o_y2, r2o_z2, r2o_roll2, r2o_pitch2, r2o_yaw2);
 
-    	landmarkPoseMat.at<float>(0,0)=xo;          // in odom frame     
+
+ 			dataFile<<"first: x:"<<xf<<", y:"<<yf<<", z:"<<zf<<", roll:"<<rollf<<", pitch:"<<pitchf<<", yaw:"<<yawf<<std::endl;
+ 			dataFile<<"last: x:"<<xl<<", y:"<<yl<<", z:"<<zl<<", roll:"<<rolll<<", pitch:"<<pitchl<<", yaw:"<<yawl<<std::endl;
+ 		    dataFile<<"robot: x:"<<r2o_x2<<", y:"<<r2o_y2<<", z:"<<r2o_z2<<", roll:"<<r2o_roll2<<", pitch:"<<r2o_pitch2<<", yaw:"<<r2o_yaw2<<std::endl;
+ 		    
+ 		    optmFile<<r2o_x2<<","<<r2o_y2<<std::endl;
+
+	    }
+
+	    
+
+	    geometry_msgs::TransformStamped robotPoseOptmMsg;
+		robotPoseOptmMsg.child_frame_id = optmFrameId_;              
+		robotPoseOptmMsg.header.frame_id = odomFrameId_;          
+		robotPoseOptmMsg.header.stamp = stamp;
+		rtabmap_ros::transformToGeometryMsg(robot, robotPoseOptmMsg.transform);
+		tfBroadcaster_.sendTransform(robotPoseOptmMsg);
+
+
+
+
+
+	    /* Mat for userData passed to SensorData and read by map_optimizer */
+    	/*landmarkPoseMat.at<float>(0,0)=xo;                  
 	    landmarkPoseMat.at<float>(0,1)=yo;
-	    landmarkPoseMat.at<float>(0,2)=zo;
+	    landmarkPoseMat.at<float>(0,2)=zo;                      // in odom
 	    landmarkPoseMat.at<float>(1,0)=roll_o;
 	    landmarkPoseMat.at<float>(1,1)=pitch_o;
-	    landmarkPoseMat.at<float>(1,2)=yaw_o;
+	    landmarkPoseMat.at<float>(1,2)=yaw_o;*/
 
-	    //Kamal
-	    //landmarkPosePub_.publish(landmarkPose);  // in camera_landmark frame
 
-	    /*dataFile<<"Dina landmark pose: x:"<<landmarkPose.pose.pose.position.x<<", y:"<<landmarkPose.pose.pose.position.x<<", z:"<<landmarkPose.pose.pose.position.x
-	    		<<", roll:"<<roll<<", pitch:"<<pitch<<", yaw:" << yaw<< std::endl;*/
 
-	    dataFile<<"landmark pose in camera_landmark: x:"<<xc<<", y:"<<yc<<", z:"<<zc<<", roll:"<<roll_c<<", pitch:"<<pitch_c<<", yaw:" << yaw_c<< std::endl;	    
-	    dataFile<<"landmark pose in robot frame: x:"<< xr <<", y:"<< yr <<", z:"<< zr<<", roll:"<<roll_r<<", pitch:"<<pitch_r<<", yaw:" << yaw_r << std::endl;
-	    dataFile<<"landmark pose in odom: x:"<< xo <<", y:"<< yo <<", z:"<< zo <<", roll:"<<roll_o<<", pitch:"<<pitch_o<<", yaw:" << yaw_o<< std::endl;
+
+	    /*visualization_msgs::Marker robotPose_marker2;
+
+		robotPose_marker2.header.frame_id = mapFrameId_;
+		robotPose_marker2.header.stamp = ros::Time();
+		robotPose_marker2.ns = "robot_pose_marker2";          //namespace
+		robotPose_marker2.id = markerCounter2;
+		markerCounter2 ++;
+		robotPose_marker2.type = visualization_msgs::Marker::ARROW;
+		robotPose_marker2.action = visualization_msgs::Marker::ADD;
+		robotPose_marker2.pose.position.x = x_rio;
+		robotPose_marker2.pose.position.y = y_rio;
+		robotPose_marker2.pose.position.z = z_rio;
+		geometry_msgs::Quaternion q = tf::createQuaternionMsgFromRollPitchYaw(roll_rio,pitch_rio,yaw_rio);
+		robotPose_marker2.pose.orientation.x = q.x;
+		robotPose_marker2.pose.orientation.y = q.y;
+		robotPose_marker2.pose.orientation.z = q.z;
+		robotPose_marker2.pose.orientation.w = q.w;
+		robotPose_marker2.scale.x = 0.2;
+		robotPose_marker2.scale.y = 0.05;
+		robotPose_marker2.scale.z = 0.05;
+		robotPose_marker2.color.a = 1.0; 
+		robotPose_marker2.color.r = 0.0;
+		robotPose_marker2.color.g = 0.0;
+		robotPose_marker2.color.b = 1.0;
+		robotPoseMarkerPub2_.publish(robotPose_marker2);
+
+		nav_msgs::Odometry robotPose_odom2;
+
+		rtabmap_ros::transformToPoseMsg(robotInOdom,robotPose_odom2.pose.pose);
+		robotPose_odom2.header.stamp = ros::Time::now();
+		robotPose_odom2.header.frame_id = odomFrameId_;      //odom
+		robotPose_odom2.child_frame_id = frameId_;           //base_link 
+
+		robotPosePub2_.publish(robotPose_odom2);
+		sleep(1.0);*/
 
     }
+
+
 
 	SensorData data(scan,
 			scan2dMsg.get() != 0?(int)scan2dMsg->ranges.size():genMaxScanPts,
@@ -1974,6 +2098,8 @@ bool CoreWrapper::getMapCallback(rtabmap_ros::GetMap::Request& req, rtabmap_ros:
 	res.data.header.stamp = ros::Time::now();
 	res.data.header.frame_id = mapFrameId_;
 
+	dataFile << "getMapCallback: poses.size:" << poses.size() << ", constraints.size:" << constraints.size() << std::endl;
+
 	return true;
 }
 
@@ -2115,6 +2241,8 @@ bool CoreWrapper::publishMapCallback(rtabmap_ros::PublishMap::Request& req, rtab
 				*msg);
 
 			mapDataPub_.publish(msg);
+
+			dataFile << "publishMapCallback: if(mapDataPub_.getNumSubscribers()): constraints.size:" << constraints.size() << std::endl;
 		}
 
 		if(mapGraphPub_.getNumSubscribers())
@@ -2129,6 +2257,8 @@ bool CoreWrapper::publishMapCallback(rtabmap_ros::PublishMap::Request& req, rtab
 				*msg);
 
 			mapGraphPub_.publish(msg);
+
+			dataFile << "publishMapCallback: if(mapGraphPub_.getNumSubscribers()): constraints.size:" << constraints.size() << std::endl;
 		}
 
 		if(!req.graphOnly && mapsManager_.hasSubscribers())

@@ -8,7 +8,7 @@ landmarkDetection::landmarkDetection()
 
 }
 
-void landmarkDetection::imageReceived(const sensor_msgs::ImageConstPtr& img)
+void landmarkDetection::imageReceivedCallback(const sensor_msgs::ImageConstPtr& img)
 {
 	cv_bridge::CvImagePtr cv_ptr;
     ros::Time timestamp;
@@ -47,8 +47,6 @@ void landmarkDetection::imageReceived(const sensor_msgs::ImageConstPtr& img)
     Mat hsv;
     cvtColor(erosion_dst,hsv,CV_BGR2HSV);
 
-    //imshow("HSV", hsv);
-
     // Threshold the HSV image, keep only the red pixels
     Mat lower_red_hue_range;
     Mat upper_red_hue_range;
@@ -59,7 +57,6 @@ void landmarkDetection::imageReceived(const sensor_msgs::ImageConstPtr& img)
     Mat red_hue_image;
     addWeighted(lower_red_hue_range, 1.0, upper_red_hue_range, 1.0, 0.0, red_hue_image);
     GaussianBlur(red_hue_image, red_hue_image, cv::Size(9, 9), 2, 2);
-    //imshow("Red_Hue_Image", red_hue_image);
 
 
     int dilation_size = 10;
@@ -102,21 +99,6 @@ bool landmarkDetection::getDetectionStatus(ros::Time timestamp)
 {
     return landmarkDetection::map.find(timestamp)->second;
 }
-
-/*int main(int argc, char** argv)
-{
-	ros::init(argc, argv, "landmark_haar_detection_node");
-
-	ros::NodeHandle nh;
-	ros::Subscriber kinectSub;
-    landmarkDetection detect_landmark;
-
-    kinectSub = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 50, boost::bind(&landmarkDetection::imageReceived, &detect_landmark, _1));
-
-    ros::spin();
-    
-	
-}*/
 
 
 
