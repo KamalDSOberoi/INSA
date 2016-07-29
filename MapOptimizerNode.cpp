@@ -174,11 +174,11 @@ public:
 	/* Dina Youakim */
 	void fillOldLandmarks(rtabmap_ros::MapDataConstPtr & msg,std::map<int, rtabmap::Transform> &posesOut, std::multimap<int, rtabmap::Link> &constraints)
 	{
-		landmarks<<"Start fillOldLandmarks:"<<std::endl;
+		landmarks<<"fillOldLandmarks: Start"<<std::endl;
 		
 		if(!landmarksCache_.empty())
 		{
-			landmarks<<"start inserting old landmark nodes "<<std::endl;
+			landmarks<<"fillOldLandmarks: start inserting old landmark nodes "<<std::endl;
 			bool firstLandmarkObseervation = true;
 			for(std::map<int, rtabmap::Transform>::iterator iter = landmarksCache_.begin(); iter != landmarksCache_.end(); ++iter)
 			{
@@ -212,31 +212,32 @@ public:
 				link.setFrom(iter->first);
 				link.setTo (landmarkCounter);
 				link.setType (rtabmap::Link::kLandmark);
-				link.setTransform(landmarkToRobotPose);
+				link.setTransform(landmarkObservation);
+				//link.setTransform(landmarkToRobotPose);
 				constraints.insert(std::make_pair(link.from(),link));
 
-				landmarks << "old landmarks filled" << std::endl;
+				landmarks << "fillOldLandmarks: old landmarks filled" << std::endl;
 
 
-				landmarks<<"landmark node created between "<<iter->first<<","<<landmarkCounter<<std::endl;
+				landmarks<<"fillOldLandmarks: landmark node created between "<<iter->first<<","<<landmarkCounter<<std::endl;
 
-				landmarks<<"the landmark pose is: "<<landmarkObservation.translation().x()<<","<<landmarkObservation.translation().y()
-						 <<","<<landmarkObservation.theta()<<std::endl;
+				landmarks<<"fillOldLandmarks: landmarkObservation: x:"<<landmarkObservation.translation().x()<<", y:"<<landmarkObservation.translation().y()
+						 <<", theta:"<<landmarkObservation.theta()<<std::endl;
 
-				landmarks<<"the landmark constraint is: "<<landmarkToRobotPose.translation().x()<<","<<landmarkToRobotPose.translation().y()
-				         <<","<<landmarkToRobotPose.translation().theta()<<std::endl;
+				//landmarks<<"fillOldLandmarks: landmarkToRobotPose: x:"<<landmarkToRobotPose.translation().x()<<", y:"<<landmarkToRobotPose.translation().y()
+				         //<<", theta:"<<landmarkToRobotPose.translation().theta()<<std::endl;
 			}
 		}
 
-		ROS_INFO_STREAM("Old Landmarks filled");
-		landmarks<<"End fillOldLandmarks"<<std::endl;
+		ROS_INFO_STREAM("fillOldLandmarks: Old Landmarks filled");
+		landmarks<<"fillOldLandmarks: End"<<std::endl;
 
 	}
 
 	/* Kamal: add new landmark link to constraint rather than linksOut */
     void createLandmarks(rtabmap_ros::MapDataConstPtr & msg, std::map<int, rtabmap::Transform> &poses, std::multimap<int, Link> &constraints)
 	{
-		landmarks<<"Start createLandmarks:"<<std::endl;
+		landmarks<<"createLandmarks: Start"<<std::endl;
 		for(unsigned int i=0; i<msg->nodes.size(); ++i)
 		{
 			rtabmap_ros::NodeData currentNode = msg->nodes[i];
@@ -249,43 +250,45 @@ public:
 
 				rtabmap::Transform landmarkObservation(landmark.at<float>(0,0),landmark.at<float>(0,1),landmark.at<float>(0,2),
 					                                   landmark.at<float>(1,0),landmark.at<float>(1,1),landmark.at<float>(1,2));
+				
+				float lo_x, lo_y, lo_z, lo_roll, lo_pitch, lo_yaw;
+				landmarkObservation.getTranslationAndEulerAngles(lo_x, lo_y, lo_z, lo_roll, lo_pitch, lo_yaw);
+				landmarks << "createLandmarks: landmarkObservation: x:" << lo_x << ", y:" << lo_y << ", z:" << lo_z
+				          << ", roll:" << lo_roll << ", pitch:" <<  lo_pitch << ", yaw:" << lo_yaw << std::endl;
+
 
 				double roll, pitch, yaw;
 				tf::Quaternion quat;
     			tf::quaternionMsgToTF(currentNode.pose.orientation, quat);
 				tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-
 				rtabmap::Transform robotPose(currentNode.pose.position.x, currentNode.pose.position.y, currentNode.pose.position.z, roll, pitch, yaw);
-				rtabmap::Transform landmarkToRobotPose =  (robotPose)*landmarkObservation;
-				
-				//landmarks<<"observed at time: "<<currentNode.stamp<<", for node: "<<currentNode.id<<std::endl;
+				float rp_x, rp_y, rp_z, rp_roll, rp_pitch, rp_yaw;
+				robotPose.getTranslationAndEulerAngles(rp_x, rp_y, rp_z, rp_roll, rp_pitch, rp_yaw);
+				landmarks << "createLandmarks: robotPose: x:" << rp_x << ", y:" << rp_y << ", z:" << rp_z
+				          << ", roll:" << rp_roll << ", pitch:" << ", yaw:" << rp_yaw << std::endl;
 
-				float r,p,y;
-				landmarkObservation.getEulerAngles(r,p,y);
 
-				landmarks << "landmark counter: " << landmarkCounter << std::endl;
-				
-				//landmarks<<"landmark node created between "<<currentNode.id<<","<<landmarkCounter<<std::endl;
-				//landmarks<<"the landmark pose is: "<<landmarkObservation.translation().x()<<","<<landmarkObservation.translation().y()<<","<<landmarkObservation.theta()<<std::endl;
-			    //landmarks<<"the landmark constraint is: "<<landmarkToRobotPose.translation().x()<<","<<landmarkToRobotPose.translation().y()<<","<<landmarkToRobotPose.theta()<<std::endl;*
+				rtabmap::Transform landmarkToRobotPose =  robotPose * landmarkObservation;
+				float l2r_x, l2r_y, l2r_z, l2r_roll, l2r_pitch, l2r_yaw;
+				landmarkToRobotPose.getTranslationAndEulerAngles(l2r_x, l2r_y, l2r_z, l2r_roll, l2r_pitch, l2r_yaw);
+				//landmarks << "createLandmarks: landmarkToRobotPose: x:" << l2r_x << ", y:" << l2r_y << ", z:" << l2r_z
+				          //<< ", roll:" << l2r_roll << ", pitch:" << l2r_pitch << ", yaw:" << l2r_yaw << std::endl;
 
-				//landmarks<< "landmark observed at: x:" << landmarkObservation.translation().x()<<", y:"<<landmarkObservation.translation().y()<<", theta:"<<landmarkObservation.theta()<<std::endl;
+
+				landmarks << "createLandmarks: landmark counter: " << landmarkCounter << std::endl;
 				
-				//landmarks<< "landmark observed at: x:" << landmarkObservation.x()<<", y:"<<landmarkObservation.y()<<", theta:"<<landmarkObservation.theta()<<std::endl;
 
 				/* Create landmark link*/
 				rtabmap::Link link;
 				link.setFrom(currentNode.id);
 				link.setTo(landmarkCounter);
 				link.setType(rtabmap::Link::kLandmark);
-				link.setTransform(landmarkToRobotPose);
+				link.setTransform(landmarkObservation);
+				//link.setTransform(landmarkToRobotPose);
 				//link.setInfMatrix() ???;
 				//link.setVariance() ???;
 				constraints.insert(std::make_pair(link.from(),link));
-				landmarks << "new landmark link created from "<< currentNode.id << " to " << landmarkCounter << std::endl;
-
-
-				//std::map<int,std::vector< rtabmap::Transform > >::iterator  it;
+				landmarks << "createLandmarks: new landmark link created from "<< currentNode.id << " to " << landmarkCounter << std::endl;
 
 				//if the cache is empty; it means it is first time to observe the landmark
 				if(landmarksCache_.empty())
@@ -295,15 +298,14 @@ public:
 				}
 					
 				landmarksCache_.insert(std::make_pair<int, rtabmap::Transform>(currentNode.id,landmarkObservation));				
-
-				ROS_INFO_STREAM("New Landmarks created");
-				landmarks<<"End createLandmarks"<<std::endl;
 				
 			}
 			
 		}
 
-		landmarks<<"current landmark cache size is: "<<landmarksCache_.size()<<std::endl;
+		landmarks<<"createLandmarks: current landmark cache size is: "<<landmarksCache_.size()<<std::endl;
+		ROS_INFO_STREAM("createLandmarks: New Landmarks created");
+		landmarks<<"createLandmarks: End"<<std::endl;
 
 	}
 
@@ -424,8 +426,8 @@ public:
 			}
 
 
-			landmarks<<"robot_pose: frame_id: "<<modifiedMapData->header.frame_id<<", nodeId: "<<s.id()<<", pose.x(): "<<pose.x()
-                     <<", pose.y(): "<<pose.y()<<", pose.z(): "<<pose.z()<<", pose.theta(): "<<pose.theta()<<std::endl;       // robot poses
+			landmarks<<"robot_pose: frame_id: "<<modifiedMapData->header.frame_id<<", nodeId: "<<s.id()<<", x: "<<pose.x()
+                     <<", y: "<<pose.y()<<", z: "<<pose.z()<<", theta: "<<pose.theta()<<std::endl;       // robot poses
 		
 		}
 
@@ -653,6 +655,8 @@ public:
 				//optimizedPoses = optimizer_->optimizeWithLandmarks(fromId, posesOut, linksOut);   // optimizedPoses is of type std::map<int, Transform>
 				optimizedPoses = optimizer_->optimize(fromId, posesOut, linksOut);   // optimizedPoses is of type std::map<int, Transform>
 				
+				mapToOdomMutex_.lock();
+
 				for (std::map<int, Transform>::iterator iter = optimizedPoses.begin(); iter != optimizedPoses.end(); ++iter)
 				{
 					landmarks << "optimizedPoses: id:" << iter->first << ", x:" << iter->second.x() << ", y:" << iter->second.y()
@@ -670,8 +674,6 @@ public:
 						break;
 					}
 				}
-
-				mapToOdomMutex_.lock();
 
 				currentRobotPose = optimizedPoses.at(posesOutNoLandmarks.rbegin()->first);
 				landmarks << "currentRobotPose: x:" << currentRobotPose.x() << ", y:" << currentRobotPose.y()
@@ -780,7 +782,7 @@ public:
 
 			//landmarkPose = mapCorrection*landmarkPose;
 			
-			visualization_msgs::Marker marker;
+			/*visualization_msgs::Marker marker;
 			marker.header.frame_id = mapFrameId_;
 			marker.header.stamp = ros::Time::now();
 			marker.ns = "landmark";
@@ -825,13 +827,13 @@ public:
 			marker2.color.b = 0.0;
 
 			marker2.type = visualization_msgs::Marker::CUBE;
-			robotPosePub_.publish(marker2);
+			robotPosePub_.publish(marker2);*/
 
 
 
 			geometry_msgs::TransformStamped msg;
 			msg.child_frame_id = "landmark";
-			msg.header.frame_id = mapFrameId_;     // mapframeId
+			msg.header.frame_id = odomFrameId_;     // odomFrameId
 			msg.header.stamp = ros::Time::now() ;
 			rtabmap_ros::transformToGeometryMsg(landmarkPose, msg.transform);
 			tfBroadcaster_.sendTransform(msg);
