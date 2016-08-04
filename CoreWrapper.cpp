@@ -82,7 +82,7 @@ CoreWrapper::CoreWrapper(bool deleteDbOnStart, const ParametersMap & parameters)
 		frameId_("base_link"),
 		optmFrameId_("optm_link"),
 		mapFrameId_("map"),
-		odomFrameId_("odom"),
+		odomFrameId_(""),
 		groundTruthFrameId_(""), // e.g., "world"
 		configPath_(""),
 		databasePath_(UDirectory::homeDir()+"/.ros/"+rtabmap::Parameters::getDefaultDatabaseName()),
@@ -120,7 +120,7 @@ CoreWrapper::CoreWrapper(bool deleteDbOnStart, const ParametersMap & parameters)
 	bool subscribeStereo = false;
 	int depthCameras = 1;
 	int queueSize = 10;
-	bool publishTf = true;
+	bool publishTf = false;
 	double tfDelay = 0.05; // 20 Hz
 	std::string tfPrefix = "";
 	bool stereoApproxSync = false;
@@ -642,6 +642,13 @@ bool CoreWrapper::commonOdomUpdate(const nav_msgs::OdometryConstPtr & odomMsg)
 
 		Transform robot_pose = mapToOdom_*odom;           // mapToOdom_ => after map correction; odomMsg => odomToBase transform published by OdometryROS
 
+		//Transform robot_pose = odom;
+
+		if(robot_pose.isNull())
+		{
+			ROS_WARN("robot_pose_kinect is null");
+		}
+
 		float xm,ym,zm,rollm, pitchm, yawm, xod,yod,zod,rollod, pitchod, yawod;
 		mapToOdom_.getTranslationAndEulerAngles(xm,ym,zm,rollm, pitchm, yawm);
 		odom.getTranslationAndEulerAngles(xod,yod,zod,rollod, pitchod, yawod);
@@ -653,8 +660,9 @@ bool CoreWrapper::commonOdomUpdate(const nav_msgs::OdometryConstPtr & odomMsg)
 		float x,y,z,roll, pitch, yaw;
 		robot_pose.getTranslationAndEulerAngles(x, y, z, roll, pitch, yaw);
 		
-		//dataFile<< "robot_pose in map frame: x:" << x<<", y:"<<y<< ", z:"<<z<<", yaw:"<< yaw << ", timestamp: "<< ros::Time::now()<< std::endl;
-		//kinectFile<<x<<","<<y<<std::endl;
+		dataFile<< "robot_pose kinect: x:" << x<<", y:"<<y<< ", z:"<<z
+				<<", roll:"<< roll<<", pitch:"<< pitch<<", yaw:"<< yaw << ", timestamp: "<< ros::Time::now()<< std::endl;
+		kinectFile<<x<<","<<y<<","<<z<<std::endl;
 
 		/*visualization_msgs::Marker robotPose_marker;
 
@@ -821,7 +829,7 @@ Transform CoreWrapper::getTransform(const std::string & fromFrameId, const std::
 			//if(!tfBuffer_.canTransform(fromFrameId, toFrameId, stamp, ros::Duration(1)))
 			if(!tfListener_.waitForTransform(fromFrameId, toFrameId, stamp, ros::Duration(waitForTransformDuration_)))
 			{
-				ROS_WARN("rtabmap: Could not get transform from %s to %s after %f seconds (for stamp=%f)!",
+				ROS_WARN("CoreWrapper getTransform: Could not get transform from %s to %s after %f seconds (for stamp=%f)!",
 						fromFrameId.c_str(), toFrameId.c_str(), waitForTransformDuration_, stamp.toSec());
 				return transform;
 			}
@@ -871,7 +879,7 @@ void CoreWrapper::commonDepthCallback(
 	if(odomT.isNull() && !odomFrameId_.empty())
 	{
 		dataFile<<"commonDepthCallback: odom is empty" << std::endl;
-		ROS_WARN("Could not get TF transform from %s to %s, sensors will not be synchronized with odometry pose.",
+		ROS_WARN("commonDepthCallback: Could not get TF transform from %s to %s, sensors will not be synchronized with odometry pose.",
 				odomFrameId.c_str(), frameId_.c_str());
 	}
 
@@ -1130,6 +1138,7 @@ void CoreWrapper::commonDepthCallback(
 
     	Transform landmarkInOptm = (cameraLandmarkInOptm)*(landmarkInCameraLandmark);
     	robotPose.push_back(landmarkInOptm);
+    	
     	float xr,yr,zr,roll_r, pitch_r, yaw_r;
     	landmarkInOptm.getTranslationAndEulerAngles(xr, yr, zr, roll_r, pitch_r, yaw_r);
     	dataFile<<"landmarkInOptm: x:"<< xr <<", y:"<< yr <<", z:"<< zr<<", roll:" << roll_r <<", pitch:" << pitch_r <<", yaw:" << yaw_r <<std::endl;
@@ -1145,7 +1154,7 @@ void CoreWrapper::commonDepthCallback(
 
 	    first = robotPose.front();
 	    last = robotPose.back();
-	    robot = first * (last.inverse());
+	    robot = first * (last.inverse()); // robot pose in optm_link
 	    	
 	    first.getTranslationAndEulerAngles(xf, yf, zf, rollf, pitchf, yawf);
 	    last.getTranslationAndEulerAngles(xl, yl, zl, rolll, pitchl, yawl);
@@ -1154,18 +1163,19 @@ void CoreWrapper::commonDepthCallback(
 
  		//dataFile<<"first: x:"<<xf<<", y:"<<yf<<", z:"<<zf<<", roll:"<<rollf<<", pitch:"<<pitchf<<", yaw:"<<yawf<<std::endl;
  		//dataFile<<"last: x:"<<xl<<", y:"<<yl<<", z:"<<zl<<", roll:"<<rolll<<", pitch:"<<pitchl<<", yaw:"<<yawl<<std::endl;
- 		dataFile<<"robot: x:"<<r2o_x2<<", y:"<<r2o_y2<<", z:"<<r2o_z2<<", roll:"<<r2o_roll2<<", pitch:"<<r2o_pitch2<<", yaw:"<<r2o_yaw2<<std::endl;
- 		    
+ 		dataFile<<"robot_pose optimetre: x:"<<r2o_x2<<", y:"<<r2o_y2<<", z:"<<r2o_z2<<", roll:"<<r2o_roll2<<", pitch:"<<r2o_pitch2<<", yaw:"<<r2o_yaw2<<std::endl;
+ 		optmFile<<r2o_x2<<","<<r2o_y2<<","<<r2o_z2<<std::endl;    
  
         /* broadcast odom->optm_link transform (robot pose calculated using landmarks) */
 	    geometry_msgs::TransformStamped robotPoseOptmMsg;
 		robotPoseOptmMsg.child_frame_id = optmFrameId_;              
-		robotPoseOptmMsg.header.frame_id = odomFrameId_;          
+		robotPoseOptmMsg.header.frame_id = odomFrameId_;     // robot pose calculated using optimetre is in odom frame; should be in map frame           
 		robotPoseOptmMsg.header.stamp = stamp;
 		rtabmap_ros::transformToGeometryMsg(robot, robotPoseOptmMsg.transform);
 		tfBroadcaster_.sendTransform(robotPoseOptmMsg);
 
 		Transform optmInOdomT = getTransform(odomFrameId, optmFrameId_, lastPoseStamp_);
+
 		if(!optmInOdomT.isNull())
 		{
 			dataFile<<"odom->optm_link not null"<<std::endl;
@@ -1173,16 +1183,26 @@ void CoreWrapper::commonDepthCallback(
     		float xo,yo,zo,roll_o, pitch_o, yaw_o;
     		landmarkInOdom.getTranslationAndEulerAngles(xo, yo, zo, roll_o, pitch_o, yaw_o);
     		dataFile<<"landmarkInOdom: x:"<< xo <<", y:"<< yo <<", z:"<< zo <<", roll:" << roll_o<<", pitch:" << pitch_o<<", yaw:" << yaw_o<< std::endl;
+    		dataFile<<std::endl;
 
     		/* Mat for userData passed to SensorData and read by map_optimizer */
-    		landmarkPoseMat.at<float>(0,0)=xo;                  
-	    	landmarkPoseMat.at<float>(0,1)=yo;
-	    	landmarkPoseMat.at<float>(0,2)=zo;                      // in odom
-	    	landmarkPoseMat.at<float>(1,0)=roll_o;
-	    	landmarkPoseMat.at<float>(1,1)=pitch_o;
-	    	landmarkPoseMat.at<float>(1,2)=yaw_o;
+    		landmarkPoseMat.at<float>(0,0)=xr;                  
+	    	landmarkPoseMat.at<float>(0,1)=yr;
+	    	landmarkPoseMat.at<float>(0,2)=zr;                      // in optm
+	    	landmarkPoseMat.at<float>(1,0)=roll_r;
+	    	landmarkPoseMat.at<float>(1,1)=pitch_r;
+	    	landmarkPoseMat.at<float>(1,2)=yaw_r;
+
+	    	/*geometry_msgs::TransformStamped msg;
+			msg.child_frame_id = "landmark";
+			msg.header.frame_id = odomFrameId_;     // odomFrameId
+			msg.header.stamp = ros::Time::now() ;
+			rtabmap_ros::transformToGeometryMsg(landmarkInOdom, msg.transform);
+			tfBroadcaster_.sendTransform(msg);*/
 
 		}
+
+		
 
 
 
@@ -2226,7 +2246,7 @@ bool CoreWrapper::publishMapCallback(rtabmap_ros::PublishMap::Request& req, rtab
 		{
 			rtabmap_ros::MapDataPtr msg(new rtabmap_ros::MapData);
 			msg->header.stamp = now;
-			msg->header.frame_id = mapFrameId_;
+			msg->header.frame_id = mapFrameId_;    // map data in map 
 
 			rtabmap_ros::mapDataToROS(poses,
 				constraints,
@@ -2236,14 +2256,13 @@ bool CoreWrapper::publishMapCallback(rtabmap_ros::PublishMap::Request& req, rtab
 
 			mapDataPub_.publish(msg);
 
-			dataFile << "publishMapCallback: if(mapDataPub_.getNumSubscribers()): constraints.size:" << constraints.size() << std::endl;
 		}
 
 		if(mapGraphPub_.getNumSubscribers())
 		{
 			rtabmap_ros::MapGraphPtr msg(new rtabmap_ros::MapGraph);
 			msg->header.stamp = now;
-			msg->header.frame_id = mapFrameId_;
+			msg->header.frame_id = mapFrameId_;      // map graph in map  
 
 			rtabmap_ros::mapGraphToROS(poses,
 				constraints,
@@ -2459,7 +2478,7 @@ void CoreWrapper::publishStats(const ros::Time & stamp)
 	{
 		rtabmap_ros::MapDataPtr msg(new rtabmap_ros::MapData);
 		msg->header.stamp = stamp;
-		msg->header.frame_id = mapFrameId_;
+		msg->header.frame_id = mapFrameId_;     // map data in map
 
 		rtabmap_ros::mapDataToROS(
 			stats.poses(),
@@ -2475,7 +2494,7 @@ void CoreWrapper::publishStats(const ros::Time & stamp)
 	{
 		rtabmap_ros::MapGraphPtr msg(new rtabmap_ros::MapGraph);
 		msg->header.stamp = stamp;
-		msg->header.frame_id = mapFrameId_;
+		msg->header.frame_id = mapFrameId_;     // map graph in map
 
 		rtabmap_ros::mapGraphToROS(
 			stats.poses(),
