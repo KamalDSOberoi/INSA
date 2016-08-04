@@ -1,0 +1,255 @@
+file initialized in CoreWrapper
+
+robot_pose kinect: x:0, y:0, z:0, roll:0, pitch:-0, yaw:0, timestamp: 1470297470.491060695
+landmarkInCameraLandmark: x:-3.45066, y:-0.552908, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:0.00277736
+landmarkInOptm: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+baseInOdomT: x:0, y:0, z:0, roll:0, pitch:-0, yaw:0
+robot_pose optimetre: x:2.38419e-07, y:0, z:0, roll:0, pitch:-0, yaw:5.82077e-11
+
+robot_pose kinect: x:0.00117711, y:0.00740235, z:-0.000168945, roll:-0.000235471, pitch:-9.23673e-05, yaw:-0.00215815, timestamp: 1470297471.999282722
+landmarkInCameraLandmark: x:-3.45601, y:-0.556609, z:0.227157, roll:-0.0109274, pitch:-0.0168105, yaw:0.00203956
+landmarkInOptm: x:3.45689, y:0.551104, z:0.227157, roll:-0.0109274, pitch:-0.0168105, yaw:-3.14115
+baseInOdomT: x:0.00117711, y:0.00740235, z:-0.000168945, roll:-0.000235471, pitch:-9.23673e-05, yaw:-0.00215815
+robot_pose optimetre: x:-0.00483274, y:-0.00664574, z:-0.00286843, roll:-0.00141532, pitch:-0.000431731, yaw:0.000761596
+
+robot_pose kinect: x:0.00204645, y:0.000619295, z:0.000298923, roll:-7.93075e-05, pitch:6.32888e-05, yaw:-0.000184507, timestamp: 1470297475.897494871
+landmarkInCameraLandmark: x:-3.45579, y:-0.550504, z:0.228025, roll:-0.0103758, pitch:-0.0167868, yaw:0.00378289
+landmarkInOptm: x:3.45667, y:0.545, z:0.228025, roll:-0.0103758, pitch:-0.0167868, yaw:-3.1394
+baseInOdomT: x:0.00204645, y:0.000619295, z:0.000298923, roll:-7.93075e-05, pitch:6.32888e-05, yaw:-0.000184507
+robot_pose optimetre: x:-0.00557065, y:0.00564158, z:-0.0039686, roll:-0.00086309, pitch:-0.000409303, yaw:-0.000991025
+
+robot_pose kinect: x:0.0053942, y:-0.0154518, z:-0.00262295, roll:0.00114158, pitch:-0.000936749, yaw:0.00456786, timestamp: 1470297480.540487842
+landmarkInCameraLandmark: x:-3.23789, y:-0.547476, z:0.216994, roll:-0.0095849, pitch:-0.0192615, yaw:0.00061121
+landmarkInOptm: x:3.23875, y:0.542319, z:0.216994, roll:-0.0095849, pitch:-0.0192615, yaw:3.14061
+baseInOdomT: x:0.0053942, y:-0.0154518, z:-0.00262295, roll:0.00114158, pitch:-0.000936749, yaw:0.00456786
+robot_pose optimetre: x:0.214609, y:-0.00194067, z:-0.00128545, roll:-7.60232e-05, pitch:-0.00288204, yaw:0.00216756
+odom->optm_link not null
+landmarkInOdom: x:3.4347, y:0.547221, z:0.224142, roll:-0.00945095, pitch:-0.0165705, yaw:-3.14065
+
+
+robot_pose kinect: x:0.208175, y:-0.0341543, z:-0.0185639, roll:0.0025827, pitch:-0.0132428, yaw:0.013614, timestamp: 1470297485.658008179
+landmarkInCameraLandmark: x:-3.24336, y:-0.550041, z:0.220205, roll:-0.01009, pitch:-0.0197589, yaw:9.13511e-05
+landmarkInOptm: x:3.24423, y:0.544875, z:0.220205, roll:-0.01009, pitch:-0.0197589, yaw:3.14009
+baseInOdomT: x:0.208175, y:-0.0341543, z:-0.0185639, roll:0.0025827, pitch:-0.0132428, yaw:0.013614
+robot_pose optimetre: x:0.209556, y:-0.00633812, z:-0.00584643, roll:-0.00058326, pitch:-0.00337872, yaw:0.00269744
+odom->optm_link not null
+landmarkInOdom: x:3.4516, y:0.547438, z:0.225033, roll:-0.00951676, pitch:-0.0163843, yaw:-3.14041
+
+
+robot_pose kinect: x:0.210717, y:-0.0359369, z:-0.0170906, roll:0.00219085, pitch:-0.0128953, yaw:0.014256, timestamp: 1470297490.161641349
+
+robot_pose kinect: x:0.208563, y:-0.0408887, z:-0.0196741, roll:0.00216939, pitch:-0.0138071, yaw:0.0157438, timestamp: 1470297490.163528059
+landmarkInCameraLandmark: x:-3.24172, y:-0.545258, z:0.216727, roll:-0.0109431, pitch:-0.0193639, yaw:0.00156356
+landmarkInOptm: x:3.24259, y:0.540095, z:0.216727, roll:-0.0109431, pitch:-0.0193639, yaw:3.14156
+baseInOdomT: x:0.208563, y:-0.0408887, z:-0.0196741, roll:0.00216939, pitch:-0.0138071, yaw:0.0157438
+robot_pose optimetre: x:0.210285, y:0.00298333, z:-0.00062938, roll:-0.00143127, pitch:-0.00298446, yaw:0.00124151
+odom->optm_link not null
+landmarkInOdom: x:3.45148, y:0.547222, z:0.224862, roll:-0.00954548, pitch:-0.0163637, yaw:-3.14035
+
+
+robot_pose kinect: x:0.207323, y:-0.0360568, z:-0.0153216, roll:0.00186653, pitch:-0.0122076, yaw:0.0142362, timestamp: 1470297494.627203819
+landmarkInCameraLandmark: x:-2.88898, y:-0.543681, z:0.21644, roll:-0.0100736, pitch:-0.0172229, yaw:0.000427644
+landmarkInOptm: x:2.88985, y:0.539079, z:0.21644, roll:-0.0100736, pitch:-0.0172229, yaw:3.14043
+baseInOdomT: x:0.207323, y:-0.0360568, z:-0.0153216, roll:0.00186653, pitch:-0.0122076, yaw:0.0142362
+robot_pose optimetre: x:0.563159, y:0.00139511, z:0.00642893, roll:-0.000562864, pitch:-0.000842938, yaw:0.00235939
+
+robot_pose kinect: x:0.538725, y:-0.0320219, z:-0.0271871, roll:-3.99573e-05, pitch:-0.0111978, yaw:0.0140472, timestamp: 1470297498.873290048
+landmarkInCameraLandmark: x:-2.88497, y:-0.546728, z:0.211298, roll:-0.0112463, pitch:-0.0163268, yaw:-3.55989e-05
+landmarkInOptm: x:2.88584, y:0.542133, z:0.211298, roll:-0.0112463, pitch:-0.0163268, yaw:3.13996
+baseInOdomT: x:0.538725, y:-0.0320219, z:-0.0271871, roll:-3.99573e-05, pitch:-0.0111978, yaw:0.0140472
+robot_pose optimetre: x:0.567241, y:-0.00328356, z:0.0148037, roll:-0.0017343, pitch:5.53653e-05, yaw:0.00284128
+odom->optm_link not null
+landmarkInOdom: x:3.4514, y:0.547519, z:0.22482, roll:-0.00955298, pitch:-0.0163478, yaw:-3.14042
+
+
+robot_pose kinect: x:0.642667, y:-0.0278722, z:-0.0338383, roll:0.00337337, pitch:-0.0161093, yaw:0.0135148, timestamp: 1470297503.412011444
+landmarkInCameraLandmark: x:-2.5623, y:-0.542712, z:0.205016, roll:-0.00902869, pitch:-0.0195832, yaw:0.000709257
+landmarkInOptm: x:2.56316, y:0.538631, z:0.205016, roll:-0.00902869, pitch:-0.0195832, yaw:3.14071
+baseInOdomT: x:0.642667, y:-0.0278722, z:-0.0338383, roll:0.00337337, pitch:-0.0161093, yaw:0.0135148
+robot_pose optimetre: x:0.890163, y:0.0036056, z:0.0115149, roll:0.000480111, pitch:-0.00320433, yaw:0.00205865
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:0.851294, y:-0.00343397, z:-0.0421492, roll:0.00443177, pitch:-0.0262489, yaw:0.00344707, timestamp: 1470297508.036488278
+landmarkInCameraLandmark: x:-2.55905, y:-0.541207, z:0.204824, roll:-0.00919351, pitch:-0.0195448, yaw:0.00125953
+landmarkInOptm: x:2.55991, y:0.537131, z:0.204824, roll:-0.00919351, pitch:-0.0195448, yaw:3.14126
+baseInOdomT: x:0.851294, y:-0.00343397, z:-0.0421492, roll:0.00443177, pitch:-0.0262489, yaw:0.00344707
+robot_pose optimetre: x:0.893108, y:0.00647849, z:0.0119039, roll:0.000317087, pitch:-0.00316561, yaw:0.00151162
+odom->optm_link not null
+landmarkInOdom: x:3.45143, y:0.547359, z:0.224994, roll:-0.0095174, pitch:-0.016378, yaw:-3.14039
+
+
+robot_pose kinect: x:0.850594, y:0.00253423, z:-0.0483445, roll:0.00459366, pitch:-0.0281973, yaw:0.00135998, timestamp: 1470297512.845229949
+landmarkInCameraLandmark: x:-2.16413, y:-0.54445, z:0.191591, roll:-0.00824873, pitch:-0.0393829, yaw:0.00332018
+landmarkInOptm: x:2.165, y:0.541002, z:0.191591, roll:-0.00824873, pitch:-0.0393829, yaw:-3.13987
+baseInOdomT: x:0.850594, y:0.00253423, z:-0.0483445, roll:0.00459366, pitch:-0.0281973, yaw:0.00135998
+robot_pose optimetre: x:1.29122, y:0.00794059, z:-0.0170374, roll:0.00130287, pitch:-0.0230013, yaw:-0.000593016
+
+robot_pose kinect: x:1.23808, y:0.0119603, z:-0.0461993, roll:0.00611202, pitch:-0.0333723, yaw:-0.00782641, timestamp: 1470297517.357568645
+landmarkInCameraLandmark: x:-2.16435, y:-0.54349, z:0.191566, roll:-0.00825589, pitch:-0.0188291, yaw:0.00380527
+landmarkInOptm: x:2.16521, y:0.540042, z:0.191566, roll:-0.00825589, pitch:-0.0188291, yaw:-3.13938
+baseInOdomT: x:1.23808, y:0.0119603, z:-0.0461993, roll:0.00611202, pitch:-0.0333723, yaw:-0.00782641
+robot_pose optimetre: x:1.28624, y:0.00988883, z:0.0274564, roll:0.00126106, pitch:-0.00244697, yaw:-0.00105156
+odom->optm_link not null
+landmarkInOdom: x:3.45156, y:0.547389, z:0.225002, roll:-0.0095117, pitch:-0.0158915, yaw:-3.1404
+
+
+robot_pose kinect: x:1.23762, y:0.0105262, z:-0.0459197, roll:0.00545229, pitch:-0.033276, yaw:-0.00741915, timestamp: 1470297522.232209151
+landmarkInCameraLandmark: x:-2.16403, y:-0.543729, z:0.191876, roll:-0.00919362, pitch:-0.0190549, yaw:0.00385072
+landmarkInOptm: x:2.1649, y:0.540282, z:0.191876, roll:-0.00919362, pitch:-0.0190549, yaw:-3.13933
+baseInOdomT: x:1.23762, y:0.0105262, z:-0.0459197, roll:0.00545228, pitch:-0.033276, yaw:-0.00741915
+robot_pose optimetre: x:1.28658, y:0.00952917, z:0.02716, roll:0.000324073, pitch:-0.00267486, yaw:-0.00107943
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547415, z:0.225005, roll:-0.00952255, pitch:-0.016382, yaw:-3.14041
+
+
+robot_pose kinect: x:1.23934, y:0.0157746, z:-0.046096, roll:0.00470844, pitch:-0.0329493, yaw:-0.00951599, timestamp: 1470297526.905353897
+
+robot_pose kinect: x:1.37013, y:-0.0224108, z:-0.0413092, roll:0.00668512, pitch:-0.0347653, yaw:0.00657441, timestamp: 1470297526.907307415
+landmarkInCameraLandmark: x:-1.84329, y:-0.538906, z:0.184665, roll:-0.00901499, pitch:-0.016566, yaw:0.00332673
+landmarkInOptm: x:1.84414, y:0.53597, z:0.184665, roll:-0.00901499, pitch:-0.016566, yaw:-3.13986
+baseInOdomT: x:1.37013, y:-0.0224108, z:-0.0413092, roll:0.00668512, pitch:-0.0347653, yaw:0.00657441
+robot_pose optimetre: x:1.60713, y:0.0125622, z:0.0397269, roll:0.000496963, pitch:-0.000185817, yaw:-0.000557594
+odom->optm_link not null
+landmarkInOdom: x:3.44496, y:0.547331, z:0.224836, roll:-0.00950804, pitch:-0.0163283, yaw:-3.14042
+
+
+robot_pose kinect: x:1.61507, y:-0.0063356, z:-0.0532347, roll:0.00369945, pitch:-0.0399909, yaw:0.00160197, timestamp: 1470297532.011771921
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:1.61507, y:-0.0063356, z:-0.0532347, roll:0.00369945, pitch:-0.0399909, yaw:0.00160197
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:1.61646, y:0.00237038, z:-0.0490095, roll:0.00301155, pitch:-0.0382141, yaw:-0.00279875, timestamp: 1470297536.576476863
+
+robot_pose kinect: x:2.01981, y:0.0338502, z:-0.03112, roll:0.00329619, pitch:-0.0314969, yaw:0.013876, timestamp: 1470297536.577909864
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01981, y:0.0338502, z:-0.03112, roll:0.00329619, pitch:-0.0314968, yaw:0.013876
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01753, y:0.036954, z:-0.0316258, roll:0.00415386, pitch:-0.032339, yaw:0.0122668, timestamp: 1470297541.674242036
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01753, y:0.036954, z:-0.0316258, roll:0.00415386, pitch:-0.032339, yaw:0.0122668
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01755, y:0.0343362, z:-0.0325494, roll:0.00405245, pitch:-0.0330962, yaw:0.0135999, timestamp: 1470297546.431994659
+
+robot_pose kinect: x:2.01748, y:0.0327552, z:-0.0333219, roll:0.00391256, pitch:-0.034224, yaw:0.0142143, timestamp: 1470297546.440461928
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01748, y:0.0327552, z:-0.0333219, roll:0.00391256, pitch:-0.034224, yaw:0.0142143
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01858, y:0.0350529, z:-0.0349086, roll:0.00473224, pitch:-0.0354682, yaw:0.0124608, timestamp: 1470297551.689725730
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01858, y:0.0350529, z:-0.0349086, roll:0.00473224, pitch:-0.0354682, yaw:0.0124608
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+
+robot_pose kinect: x:2.01847, y:0.0333636, z:-0.0346367, roll:0.00421657, pitch:-0.0351376, yaw:0.0138397, timestamp: 1470297556.689625373
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01847, y:0.0333636, z:-0.0346367, roll:0.00421657, pitch:-0.0351376, yaw:0.0138397
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01752, y:0.032495, z:-0.0312085, roll:0.00326113, pitch:-0.0322632, yaw:0.0147579, timestamp: 1470297561.476564155
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01752, y:0.032495, z:-0.0312085, roll:0.00326113, pitch:-0.0322632, yaw:0.0147579
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01972, y:0.0363193, z:-0.0399438, roll:0.00414084, pitch:-0.0383731, yaw:0.0122556, timestamp: 1470297566.157882659
+
+robot_pose kinect: x:2.01917, y:0.0365589, z:-0.0381485, roll:0.00471995, pitch:-0.0371309, yaw:0.0119168, timestamp: 1470297566.159221210
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01917, y:0.0365589, z:-0.0381485, roll:0.00471995, pitch:-0.0371309, yaw:0.0119168
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01838, y:0.035299, z:-0.0337652, roll:0.00428109, pitch:-0.0339467, yaw:0.0129555, timestamp: 1470297571.372099424
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01838, y:0.035299, z:-0.0337652, roll:0.00428109, pitch:-0.0339467, yaw:0.0129555
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01884, y:0.0491894, z:-0.0319502, roll:0.00448705, pitch:-0.032996, yaw:0.00373824, timestamp: 1470297576.137450426
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01884, y:0.0491894, z:-0.0319502, roll:0.00448705, pitch:-0.032996, yaw:0.00373824
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01731, y:0.0494656, z:-0.0329316, roll:0.00536708, pitch:-0.0334691, yaw:0.00363737, timestamp: 1470297581.387416995
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01731, y:0.0494656, z:-0.0329316, roll:0.00536708, pitch:-0.0334691, yaw:0.00363737
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01965, y:0.0501785, z:-0.0323589, roll:0.00499221, pitch:-0.0330388, yaw:0.00329371, timestamp: 1470297586.245762492
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01965, y:0.0501785, z:-0.0323589, roll:0.00499221, pitch:-0.0330388, yaw:0.00329371
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01894, y:0.0338235, z:-0.0310014, roll:0.00390881, pitch:-0.0330701, yaw:0.013717, timestamp: 1470297591.541627433
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01894, y:0.0338235, z:-0.0310014, roll:0.00390881, pitch:-0.0330701, yaw:0.013717
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+
+robot_pose kinect: x:2.01953, y:0.0356821, z:-0.0339934, roll:0.00674234, pitch:-0.0356924, yaw:0.0130829, timestamp: 1470297596.536286615
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01953, y:0.0356821, z:-0.0339934, roll:0.00674234, pitch:-0.0356924, yaw:0.0130829
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01863, y:0.0332563, z:-0.0350874, roll:0.00424593, pitch:-0.0350441, yaw:0.0141811, timestamp: 1470297601.586840003
+landmarkInCameraLandmark: x:-1.717, y:-0.534568, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:-0.00771031
+landmarkInOptm: x:1.71785, y:0.531833, z:0.184934, roll:-0.0102581, pitch:-0.0183591, yaw:3.13229
+baseInOdomT: x:2.01863, y:0.0332563, z:-0.0350874, roll:0.00424593, pitch:-0.0350441, yaw:0.0141811
+robot_pose optimetre: x:1.73974, y:-0.0025686, z:0.0370858, roll:-0.000764683, pitch:-0.00197272, yaw:0.0105014
+odom->optm_link not null
+landmarkInOdom: x:3.45154, y:0.547412, z:0.225001, roll:-0.00951169, pitch:-0.0163793, yaw:-3.14041
+
+
+robot_pose kinect: x:2.01903, y:0.0339175, z:-0.0353851, roll:0.00305887, pitch:-0.0352463, yaw:0.0140745, timestamp: 1470297606.376835370
+
+robot_pose kinect: x:2.01838, y:0.0316472, z:-0.0308958, roll:0.00348264, pitch:-0.03199, yaw:0.0152186, timestamp: 1470297606.379024980
