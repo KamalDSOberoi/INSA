@@ -70,7 +70,7 @@ public:
 		bool robust = true;
 		bool slam2d =false;
 		int strategy = 1;                                      // 0=TORO, 1=g2o, 2=GTSAM            
-		int iterations = 10;
+		int iterations = 15;
 		bool ignoreVariance = false;
 
 
@@ -332,24 +332,29 @@ public:
 		// Assuming that nodes/constraints are all linked together
 		UASSERT(msg->graph.posesId.size() == msg->graph.poses.size());
 
-		if(msg->nodes.size() > 1 && msg->graph.links.size() < 1)
-		{
-			ROS_WARN("The node might crash");
-			landmarks << "The node might crash" << std::endl;
-		}
-
 		bool dataChanged = false;
 
 		//Dina Youakim
 		rtabmap_ros::MapDataConstPtr modifiedMapData = msg; 
 		landmarks << std::endl;
 		landmarks << "new map data received at:" << modifiedMapData->header.stamp << std::endl;
+		
 		landmarks << "modifiedMapData->graph.links.size(): " << modifiedMapData->graph.links.size() << std::endl;
+		landmarks << "modifiedMapData->nodes.size():" << modifiedMapData->nodes.size() << std::endl;
+		for(int i = 0; i < modifiedMapData->nodes.size(); i++)
+		{
+			rtabmap_ros::NodeData currNode = modifiedMapData->nodes[i];
+			landmarks<<"node id: "<<currNode.id<<std::endl;
+		}
 		for(int i = 0; i < modifiedMapData->graph.links.size(); i++)
 		{
 			landmarks<<modifiedMapData->graph.links[i]<<std::endl;
 		}
-
+		if(msg->nodes.size() > 1 && msg->graph.links.size() < 1)
+		{
+			ROS_WARN("The node might crash");
+			landmarks << "The node might crash" << std::endl;
+		}
 		for(unsigned int i = 0; i < modifiedMapData->nodes.size(); ++i)
 		{
 			rtabmap_ros::NodeData currentNode = msg->nodes[i];
@@ -357,7 +362,7 @@ public:
 			if(!currentNode.userData.empty())
 			{
 				landmarks << "user data not empty" << std::endl;
-				/*cv::Mat userData =  cv::Mat::zeros(2,3, CV_32F);
+				cv::Mat userData =  cv::Mat::zeros(2,3, CV_32F);
 				userData = rtabmap::uncompressData(currentNode.userData);
 				for(int i = 0; i < userData.rows; i++)
 				{
@@ -365,7 +370,7 @@ public:
 					{
 						landmarks << "userData("<<i<<","<<j<<"):"<<userData.at<float>(i,j)<<std::endl;
 					}
-				}*/                    
+				}                    
 
 			}                              
 				
@@ -419,8 +424,6 @@ public:
 		}*/
 
 
-
-		landmarks << "modifiedMapData->nodes.size():" << modifiedMapData->nodes.size() << std::endl;
 		// add new odometry poses
 		std::map<int, Signature> newNodeInfos;     //save signature for each node
 		for(unsigned int i=0; i < modifiedMapData->nodes.size(); ++i)
@@ -451,7 +454,7 @@ public:
 
 
 		//for error
-		for(std::map<int, Signature>::iterator it=newNodeInfos.begin(); it!=newNodeInfos.end();++it)
+		/*for(std::map<int, Signature>::iterator it=newNodeInfos.begin(); it!=newNodeInfos.end();++it)
 		{
 
 			if(newNodeInfos.size()>1 && modifiedMapData->graph.links.size()==0)
@@ -462,7 +465,7 @@ public:
 
 			//landmarks << "newNodeInfos: id:"<<it->first<<", x:"<<it->second.getPose().x()<<", y:" <<it->second.getPose().y()<<", z:"
 			            //<<it->second.getPose().z()<<", theta:"<<it->second.getPose().theta()<< std::endl; 
-		}
+		}*/
 
 
 
@@ -779,7 +782,6 @@ public:
 
 			else if(poses.size() == 1 && constraints.size() == 0)
 			{
-				std::cout << "In second if condition" << std::endl;
 
 				optimizedPoses = poses;
 				for(std::map<int,rtabmap::Transform>::iterator it = optimizedPoses.begin(); it != optimizedPoses.end(); ++it)
@@ -791,13 +793,11 @@ public:
 			}
 
 
-
-			else if(poses.size() || constraints.size())
+			else if(poses.size() == 0 || constraints.size())
 			{
-				std::cout << "In third if condition" << std::endl;
 
-				ROS_ERROR("map_optimizer: Poses=%d and edges=%d (poses must "
-					   "not be null if there are edges, and edges must be null if poses <= 1)",
+				ROS_ERROR("map_optimizer: Poses=%d and edges=%d: poses must "
+					   "not be null if there are edges.",
 					  (int)poses.size(), (int)constraints.size());
 			}
             
@@ -821,28 +821,32 @@ public:
 				outputDataMsg.header = modifiedMapData->header;
 				outputDataMsg.graph = outputGraphMsg;
 				outputDataMsg.nodes = modifiedMapData->nodes;
-				if(posesOutRobot.size() > modifiedMapData->nodes.size())  // if(posesOut.size() > modifiedMapData->nodes.size())
+				if(posesOutRobot.size() > modifiedMapData->nodes.size())
 				{
 					std::set<int> addedNodes;
 					for(unsigned int i=0; i<modifiedMapData->nodes.size(); ++i)
 					{
 						addedNodes.insert(modifiedMapData->nodes[i].id);
 					}
+
+
 					std::list<int> toAdd;
-					for(std::map<int, Transform>::iterator iter=posesOut.begin(); iter!=posesOut.end(); ++iter)
+					for(std::map<int, Transform>::iterator iter=posesOutRobot.begin(); iter!=posesOutRobot.end(); ++iter)  // use posesOutRobot here
 					{
 						if(addedNodes.find(iter->first) == addedNodes.end())
 						{
 							toAdd.push_back(iter->first);
 						}
 					}
+
+
 					if(toAdd.size())
 					{
 						int oi = outputDataMsg.nodes.size();
 						outputDataMsg.nodes.resize(outputDataMsg.nodes.size()+toAdd.size());
 						for(std::list<int>::iterator iter=toAdd.begin(); iter!=toAdd.end(); ++iter)
 						{
-							UASSERT(cachedNodeInfos_.find(*iter) != cachedNodeInfos_.end());
+							UASSERT(cachedNodeInfos_.find(*iter) != cachedNodeInfos_.end());// if the value at iter is not found in cachedNodeInfos, then this error occurs
 							rtabmap_ros::nodeDataToROS(cachedNodeInfos_.at(*iter), outputDataMsg.nodes[oi]);
 							++oi;
 						}
