@@ -120,7 +120,7 @@ CoreWrapper::CoreWrapper(bool deleteDbOnStart, const ParametersMap & parameters)
 	bool subscribeStereo = false;
 	int depthCameras = 1;
 	int queueSize = 10;
-	bool publishTf = false;
+	bool publishTf = false;      
 	double tfDelay = 0.05; // 20 Hz
 	std::string tfPrefix = "";
 	bool stereoApproxSync = false;
@@ -550,7 +550,7 @@ void CoreWrapper::publishLoop(double tfDelay)
 			msg.child_frame_id = odomFrameId_;
 			msg.header.frame_id = mapFrameId_;
 			msg.header.stamp = tfExpiration;
-			rtabmap_ros::transformToGeometryMsg(mapToOdom_, msg.transform);
+			rtabmap_ros::transformToGeometryMsg(mapToOdom_, msg.transform);      // mapToOdom_ is the transform
 			tfBroadcaster_.sendTransform(msg);
 			mapToOdomMutex_.unlock();
 		}
@@ -654,7 +654,7 @@ bool CoreWrapper::commonOdomUpdate(const nav_msgs::OdometryConstPtr & odomMsg)
 		odom.getTranslationAndEulerAngles(xod,yod,zod,rollod, pitchod, yawod);
 
 		dataFile << std::endl;
-		//dataFile << "mapToOdom_: x:" << xm << ", y:" << ym << ", z:" << zm << ", yaw:" << yawm << std::endl;
+		dataFile << "mapToOdom_: x:" << xm << ", y:" << ym << ", z:" << zm << ", yaw:" << yawm << std::endl;
 		//dataFile << "odom: x:" << xod << ", y:" << yod << ", z:" << zod << ", yaw:" << yawod << std::endl;
 
 		float x,y,z,roll, pitch, yaw;
@@ -1140,7 +1140,8 @@ void CoreWrapper::commonDepthCallback(
     	robotPose.push_back(landmarkInOptm);
     	
     	float xr,yr,zr,roll_r, pitch_r, yaw_r;
-    	landmarkInOptm.getTranslationAndEulerAngles(xr, yr, zr, roll_r, pitch_r, yaw_r);
+    	//landmarkInOptm.getTranslationAndEulerAngles(xr, yr, zr, roll_r, pitch_r, yaw_r);
+    	robotPose.back().getTranslationAndEulerAngles(xr, yr, zr, roll_r, pitch_r, yaw_r);
     	dataFile<<"landmarkInOptm: x:"<< xr <<", y:"<< yr <<", z:"<< zr<<", roll:" << roll_r <<", pitch:" << pitch_r <<", yaw:" << yaw_r <<std::endl;
 
     	dataFile << "baseInOdomT: x:"<<b2o_x<<", y:"<<b2o_y<<", z:"<<b2o_z<<", roll:"<<b2o_roll<<", pitch:"<<b2o_pitch<<", yaw:"<<b2o_yaw<<std::endl;
@@ -1188,7 +1189,7 @@ void CoreWrapper::commonDepthCallback(
     		/* Mat for userData passed to SensorData and read by map_optimizer */
     		landmarkPoseMat.at<float>(0,0)=xr;                  
 	    	landmarkPoseMat.at<float>(0,1)=yr;
-	    	landmarkPoseMat.at<float>(0,2)=zr;                      // in optm
+	    	landmarkPoseMat.at<float>(0,2)=zr;                      // last robot pose in optm
 	    	landmarkPoseMat.at<float>(1,0)=roll_r;
 	    	landmarkPoseMat.at<float>(1,1)=pitch_r;
 	    	landmarkPoseMat.at<float>(1,2)=yaw_r;
@@ -1647,7 +1648,7 @@ void CoreWrapper::process(
 		{
 			timeRtabmap = timer.ticks();
 			mapToOdomMutex_.lock();
-			mapToOdom_ = rtabmap_.getMapCorrection();
+			mapToOdom_ = rtabmap_.getMapCorrection();          // mapCorrection
 			odomFrameId_ = odomFrameId;
 			mapToOdomMutex_.unlock();
 
@@ -2208,6 +2209,7 @@ bool CoreWrapper::getGridMapCallback(nav_msgs::GetMap::Request  &req, nav_msgs::
 bool CoreWrapper::publishMapCallback(rtabmap_ros::PublishMap::Request& req, rtabmap_ros::PublishMap::Response& res)
 {
 	ROS_INFO("rtabmap: Publishing map...");
+	dataFile << "rtabmap: Publishing map..." << std::endl;
 
 	if(mapDataPub_.getNumSubscribers() ||
 	   (!req.graphOnly && mapsManager_.hasSubscribers()) ||
@@ -2241,6 +2243,8 @@ bool CoreWrapper::publishMapCallback(rtabmap_ros::PublishMap::Request& req, rtab
 			ROS_WARN("poses and signatures are not the same size!? %d vs %d", (int)poses.size(), (int)signatures.size());
 		}
 
+		dataFile << "publishMapCallback: poses.size():"<<poses.size()<<", constraints.size():"<<constraints.size()<<std::endl;
+
 		ros::Time now = ros::Time::now();
 		if(mapDataPub_.getNumSubscribers())
 		{
@@ -2253,6 +2257,7 @@ bool CoreWrapper::publishMapCallback(rtabmap_ros::PublishMap::Request& req, rtab
 				signatures,
 				mapToOdom_,
 				*msg);
+
 
 			mapDataPub_.publish(msg);
 
@@ -2271,7 +2276,6 @@ bool CoreWrapper::publishMapCallback(rtabmap_ros::PublishMap::Request& req, rtab
 
 			mapGraphPub_.publish(msg);
 
-			dataFile << "publishMapCallback: if(mapGraphPub_.getNumSubscribers()): constraints.size:" << constraints.size() << std::endl;
 		}
 
 		if(!req.graphOnly && mapsManager_.hasSubscribers())
@@ -2461,7 +2465,18 @@ bool CoreWrapper::listLabelsCallback(rtabmap_ros::ListLabels::Request& req, rtab
 void CoreWrapper::publishStats(const ros::Time & stamp)
 {
 	UDEBUG("Publishing stats...");
+	dataFile << "Publishing stats..." << std::endl;
+
 	const rtabmap::Statistics & stats = rtabmap_.getStatistics();
+	dataFile<<"publishStats:"<<std::endl; 
+	for(std::map<int, Transform>::const_iterator iter=stats.poses().begin(); iter!=stats.poses().end();iter++)
+	{
+		dataFile << "pose id: "<<iter->first<<std::endl;
+	} 
+	for(std::multimap<int, Link>::const_iterator iter=stats.constraints().begin(); iter!=stats.constraints().end();iter++)
+	{
+		dataFile << "constraint: "<<iter->second.from()<<"-->"<<iter->second.to()<<std::endl;
+	}
 
 	if(infoPub_.getNumSubscribers())
 	{
