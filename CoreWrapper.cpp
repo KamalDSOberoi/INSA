@@ -551,6 +551,9 @@ void CoreWrapper::publishLoop(double tfDelay)
 			msg.header.frame_id = mapFrameId_;
 			msg.header.stamp = tfExpiration;
 			rtabmap_ros::transformToGeometryMsg(mapToOdom_, msg.transform);      // mapToOdom_ is the transform
+			float x,y,z,roll,pitch,yaw;
+			mapToOdom_.getTranslationAndEulerAngles(x,y,z,roll,pitch,yaw);
+			dataFile<<"publishLoop: mapToOdom_ x:"<<x<<", y:"<<y<<", z:"<<z<<", roll:"<<roll<<", pitch:"<<pitch<<", yaw:"<<yaw<<std::endl;
 			tfBroadcaster_.sendTransform(msg);
 			mapToOdomMutex_.unlock();
 		}
@@ -1649,6 +1652,9 @@ void CoreWrapper::process(
 			timeRtabmap = timer.ticks();
 			mapToOdomMutex_.lock();
 			mapToOdom_ = rtabmap_.getMapCorrection();          // mapCorrection
+			float x,y,z,roll,pitch,yaw;
+			mapToOdom_.getTranslationAndEulerAngles(x,y,z,roll,pitch,yaw);
+			dataFile<<"process: mapToOdom_ x:"<<x<<", y:"<<y<<", z:"<<z<<", roll:"<<roll<<", pitch:"<<pitch<<", yaw:"<<yaw<<std::endl;
 			odomFrameId_ = odomFrameId;
 			mapToOdomMutex_.unlock();
 
@@ -2493,7 +2499,7 @@ void CoreWrapper::publishStats(const ros::Time & stamp)
 	{
 		rtabmap_ros::MapDataPtr msg(new rtabmap_ros::MapData);
 		msg->header.stamp = stamp;
-		msg->header.frame_id = mapFrameId_;     // map data in map
+		msg->header.frame_id = odomFrameId_;     // map data in map
 
 		rtabmap_ros::mapDataToROS(
 			stats.poses(),
@@ -2509,7 +2515,7 @@ void CoreWrapper::publishStats(const ros::Time & stamp)
 	{
 		rtabmap_ros::MapGraphPtr msg(new rtabmap_ros::MapGraph);
 		msg->header.stamp = stamp;
-		msg->header.frame_id = mapFrameId_;     // map graph in map
+		msg->header.frame_id = odomFrameId_;     // map graph in map
 
 		rtabmap_ros::mapGraphToROS(
 			stats.poses(),
