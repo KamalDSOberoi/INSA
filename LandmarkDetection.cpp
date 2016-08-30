@@ -96,8 +96,7 @@ public:
         landmarkToCameraRotation(2,1) = data.adFrameAttitude[2][1];
         landmarkToCameraRotation(2,2) = data.adFrameAttitude[2][2];
 
-        Eigen::Vector3d ea = landmarkToCameraRotation.eulerAngles(0,1,2);
-        //file<<"roll,pitch,yaw: "<<ea[0]<<", "<<ea[1]<<", "<<ea[2]<<std::endl;
+        Eigen::Vector3d ea = landmarkToCameraRotation.eulerAngles(0,1,2);    // rotation not correct; corrected using the rotation matrix
 
 
 
@@ -158,8 +157,8 @@ public:
         double roll, pitch, yaw;
         tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
          
-        //file << "landmarkInCamera: x: " << landmarkPose.pose.pose.position.x << ", y: " << landmarkPose.pose.pose.position.y
-          //   <<", z: "<< landmarkPose.pose.pose.position.z <<", roll: "<< roll <<", pitch: "<< pitch << ", yaw: "<< yaw << std::endl;
+        file << "landmarkInCameraLandmark: x: " << landmarkPose.pose.pose.position.x << ", y: " << landmarkPose.pose.pose.position.y
+             <<", z: "<< landmarkPose.pose.pose.position.z <<", roll: "<< roll <<", pitch: "<< pitch << ", yaw: "<< yaw << std::endl;
          
         //ROS_INFO_STREAM("Robot To Landmark: "<<robotToLandmark.translation()<<","<<robotToLandmark.rotation());
         updateLandmarkPose.header = landmarkPose.header;
@@ -169,11 +168,11 @@ public:
         return true;
       }
 
-      else
+      /*else
       {
         ROS_WARN("Nothing received from Optimetre System");
         return false;
-      }
+      }*/
     }
 
     bool GetLandmarkPose (landmarks_detection::GetLandmarkPose::Request &req, landmarks_detection::GetLandmarkPose::Response &res)
